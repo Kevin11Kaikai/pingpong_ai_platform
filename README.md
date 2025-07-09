@@ -24,21 +24,36 @@
 ## ⚙️ 项目结构
 
 pingpong_ai_platform/
+
 ├── app/
+
 │   ├── main.py                     👈 FastAPI 入口（未来挂载所有 API）
+
 │   ├── core/                       🔧 核心工具层（数据加载、向量化、配置等）
+
 │   │   ├── data_loader.py              ✅ 加载所有 JSON 为 Document（已完成）
+
 │   │   ├── vectorstore_builder.py      ⏳ 构建 FAISS 向量库（下一步）
+
 │   │   └── config.py                   🔜 管理 API Key、路径等配置
+
 │   ├── services/                  🧠 AI 服务逻辑层
+
 │   │   └── chatbot_service.py         ⏳ 构建 RAG Chain（Retriever + Prompt + LLM）
+
 │   ├── routers/                   🌐 路由层
+
 │   │   └── chatbot.py                ⏳ 定义 `/chat` API 接口，连接前端请求
+
 │   ├── data/                      📁 训练数据目录（你已上传所有 JSON）
+
 │   └── vectorstore/              🗃️ 向量数据库保存目录（如 FAISS index）
+
 ├── .env                          🔐 环境变量（API 密钥等）
+
 ├── requirements.txt              📦 依赖列表（方便部署）
-└── README.md                     📘 项目介绍（已生成，Canvas 中可编辑）
+
+└── README.md                     📘 项目介绍
 
 
 ## 💬 如何使用
