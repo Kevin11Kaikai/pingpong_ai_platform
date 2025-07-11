@@ -1,72 +1,103 @@
-# 🏓 PingPong AI Platform
+# 🏓 Pingpong AI Platform
 
-乒乓球 AI 平台 —— 基于 FastAPI 构建的可拓展聊天机器人 MVP，预计支持论坛、器材评测、教学视频和资讯模块。
-
----
-
-## 🧩 项目背景
-
-我们希望打造一个“乒乓球垂直领域”平台，起步以 AI Chatbot 为核心，后续融入论坛交流、器材评测、教学视频、八卦/资讯等功能。采用 MVP（最小可实现系统）策略，先实现核心，逐步扩展。
+A modular AI platform designed for intelligent ping pong applications — including RAG-based learning assistants, ball tracking, equipment recommendation, and social media Q&A.
 
 ---
 
-## 🚀 技术栈
+## 📦 Project Architecture
 
-- **后端**：Python + FastAPI  
-- **异步**：原生 async/await  
-- **数据验证**：Pydantic  
-- **文档生成**：自动生成 OpenAPI / Swagger UI  
-- **数据库**：（后续）SQLModel + Alembic + PostgreSQL  
-- **可选**：MCP 支持、WebSocket、背景任务等  
-
----
-
-## ⚙️ 项目结构
-
+```
 pingpong_ai_platform/
-
 ├── app/
+│   ├── main.py                      # FastAPI entrypoint
+│   ├── routers/                    # API routers
+│   │   ├── chat.py                  # LLM chat route
+│   │   ├── tracking.py              # Ball tracking route
+│   │   └── equipment.py             # Equipment recommendation route
+│
+│   ├── LLM/                         # Language model RAG pipeline
+│   │   ├── core/                    # Core logic
+│   │   │   ├── data_loader.py           # Load & split PDFs
+│   │   │   ├── vectorstore_builder.py  # Build FAISS vectorstore
+│   │   │   └── rag_chain.py             # Build RAG chain
+│   │   ├── api/                     # API layer
+│   │   │   └── chatbot.py              # Chat endpoint logic
+│   │   └── config.py                   # API keys and path configs
+│
+│   ├── Ball_Tracking/              # Ping pong ball tracking (YOLO + CV)
+│   │   └── ball_tracking.py
+│
+│   ├── Social_Media/               # Social Q&A/forum extensions
+│   ├── Equipment_Recommendation/   # Equipment suggestions
+│   ├── Pingpong_Learning_Resource/ # Training PDFs, videos, FAQ
+│
+│   ├── data/                        # Raw data
+│   │   ├── LLM_data/                # PDFs for vectorization
+│   │   └── ball_tracking_data/
+│
+│   └── vectorstore/                # FAISS index storage
+│
+├── config/                         # .env and global config
+├── tests/                          # Unit tests
+├── scripts/                        # Init scripts (OCR, vectorstore rebuild)
+├── docker/                         # Docker/Docker-compose for deployment
+├── notebooks/                      # Jupyter experiments
+├── requirements.txt                # Python deps
+└── README.md
+```
 
-│   ├── main.py                     👈 FastAPI 入口（未来挂载所有 API）
+---
 
-│   ├── core/                       🔧 核心工具层（数据加载、向量化、配置等）
+## 🚀 Step-by-Step Development Plan
 
-│   │   ├── data_loader.py              ✅ 加载所有 JSON 为 Document（已完成）
+### Phase 1: RAG Core
+- `data_loader.py`: OCR scanned PDFs into LangChain Documents
+- `vectorstore_builder.py`: Embed and store vectors with FAISS
+- `rag_chain.py`: Create RAG pipeline using Retriever + Prompt + LLM
+- `chatbot.py`: Chat API using FastAPI + LangChain
+- `config.py`: Manage API keys and model parameters
 
-│   │   ├── vectorstore_builder.py      ⏳ 构建 FAISS 向量库（下一步）
+### Phase 2: Backend Integration
+- `main.py` + `routers/chat.py`: Route and mount `/chat` API
 
-│   │   └── config.py                   🔜 管理 API Key、路径等配置
+### Phase 3: Add Ball Tracking and Equipment Suggestion
+- `Ball_Tracking/ball_tracking.py`: Track and analyze ball movement
+- `Equipment_Recommendation/`: Build equipment knowledge base
 
-│   ├── services/                  🧠 AI 服务逻辑层
+### Phase 4: Forum Integration
+- Ingest content from forums (Reddit, Discourse, etc.)
+- Index and allow hybrid retrieval across LLM + community data
 
-│   │   └── chatbot_service.py         ⏳ 构建 RAG Chain（Retriever + Prompt + LLM）
+### Phase 5: Testing & Deployment
+- Add unit tests to `tests/`
+- Containerize with Docker
+- Automate batch PDF parsing with `scripts/`
 
-│   ├── routers/                   🌐 路由层
+---
 
-│   │   └── chatbot.py                ⏳ 定义 `/chat` API 接口，连接前端请求
+## 🧠 Features
+- ✅ RAG for scanned Chinese PDFs (via OCR)
+- ✅ Vector database with FAISS
+- ✅ Chat endpoint via FastAPI
+- 🏓 Real-time ball tracking (YOLO-based)
+- 🎓 Training content Q&A (PDFs, videos)
+- 🤖 Equipment recommendation
+- 🌐 Extendable social/forum Q&A
 
-│   ├── data/                      📁 训练数据目录（你已上传所有 JSON）
+---
 
-│   └── vectorstore/              🗃️ 向量数据库保存目录（如 FAISS index）
+## 🤝 Contributing
+Each module is self-contained and can be developed independently. Suggested roles:
 
-├── .env                          🔐 环境变量（API 密钥等）
+| Role              | Focus Area                   |
+|-------------------|------------------------------|
+| RAG Engineer      | LLM/core/, chatbot.py        |
+| Backend Engineer  | main.py, routers/, API glue  |
+| CV Engineer       | Ball_Tracking/, image models |
+| Forum Engineer    | Social_Media/, data ingestion|
+| UI Developer      | (Frontend layer - future)    |
 
-├── requirements.txt              📦 依赖列表（方便部署）
+---
 
-└── README.md                     📘 项目介绍
-
-
-## 💬 如何使用
-
-1. 克隆仓库
-2. 创建 `.env`，配置 OPENAI_API_KEY、数据库 URL 等
-3. 安装依赖：`pip install -r requirements.txt`
-4. 启动服务：`uvicorn app.main:app --reload`
-5. 打开浏览器访问 `http://localhost:8000/docs` 查看 API 文档
-6. 测试 Chatbot 接口：
-   ```bash
-   POST /chatbot/ask
-   {
-     "user_input": "你好，如何提高发球？"
-   }
-
+## 📬 License & Credits
+MIT License. Powered by LangChain, OpenAI, FAISS, FastAPI, and more.
