@@ -37,6 +37,7 @@ pingpong_ai_platform/
 │
 │   └── vectorstore/                # FAISS index storage
 │
+├── index.html                      # Frontend web interface for testing (HTML)
 ├── config/                         # .env and global config
 ├── tests/                          # Unit tests
 ├── scripts/                        # Init scripts (OCR, vectorstore rebuild)
@@ -68,7 +69,11 @@ pingpong_ai_platform/
 - Ingest content from forums (Reddit, Discourse, etc.)
 - Index and allow hybrid retrieval across LLM + community data
 
-### Phase 5: Testing & Deployment
+### Phase 5: Frontend Testing Site
+- `index.html`: Create a basic UI for testing chat and demo features
+- Connect to `/chat` API endpoint using fetch/axios
+
+### Phase 6: Testing & Deployment
 - Add unit tests to `tests/`
 - Containerize with Docker
 - Automate batch PDF parsing with `scripts/`
@@ -83,6 +88,7 @@ pingpong_ai_platform/
 - 🎓 Training content Q&A (PDFs, videos)
 - 🤖 Equipment recommendation
 - 🌐 Extendable social/forum Q&A
+- 🌍 Basic HTML interface for public demo
 
 ---
 
@@ -95,7 +101,7 @@ Each module is self-contained and can be developed independently. Suggested role
 | Backend Engineer  | main.py, routers/, API glue  |
 | CV Engineer       | Ball_Tracking/, image models |
 | Forum Engineer    | Social_Media/, data ingestion|
-| UI Developer      | (Frontend layer - future)    |
+| UI Developer      | index.html, frontend UX      |
 
 ---
 
