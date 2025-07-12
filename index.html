@@ -39,6 +39,25 @@
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .project-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .info-tag {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .features-grid {
@@ -93,12 +112,46 @@
             margin-bottom: 20px;
         }
 
+        .feature-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .feature-status {
             display: inline-block;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: bold;
+        }
+
+        .phase-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tech-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tech-badge {
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
         .status-ready {
@@ -168,6 +221,57 @@
             font-size: 0.9rem;
         }
 
+        .team-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-section h3 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .team-card {
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .team-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .team-card h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .team-card p {
+            color: #666;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -187,7 +291,12 @@
     <div class="container">
         <div class="header">
             <h1>🏓 Pingpong AI Platform</h1>
-            <p>智能乒乓球平台 - 让AI助力你的乒乓球之旅</p>
+            <p>智能乒乓球平台 - 让AI重新定义乒乓球学习体验</p>
+            <div class="project-info">
+                <span class="info-tag">📅 项目周期: 12-16周</span>
+                <span class="info-tag">🔄 并行开发</span>
+                <span class="info-tag">📊 每2-3周一个可演示版本</span>
+            </div>
         </div>
 
         <div class="features-grid">
@@ -198,7 +307,15 @@
                 <p class="feature-description">
                     基于RAG技术的智能问答系统，处理中文PDF文档，提供专业的乒乓球训练指导和技术分析。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 2 (Week 3-5)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">LangChain</span>
+                    <span class="tech-badge">FAISS</span>
+                    <span class="tech-badge">OCR</span>
+                </div>
                 <button class="demo-button">体验演示</button>
             </div>
 
@@ -209,7 +326,15 @@
                 <p class="feature-description">
                     使用YOLO和计算机视觉技术，实时追踪乒乓球运动轨迹，分析球的运动模式和速度。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 3 (Week 4-6)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">YOLO</span>
+                    <span class="tech-badge">OpenCV</span>
+                    <span class="tech-badge">Computer Vision</span>
+                </div>
                 <button class="demo-button">查看演示</button>
             </div>
 
@@ -220,7 +345,15 @@
                 <p class="feature-description">
                     基于用户需求和技能水平，提供个性化的乒乓球装备推荐，包括球拍、胶皮、球台等。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 4 (Week 5-7)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">Recommendation Engine</span>
+                    <span class="tech-badge">User Profiling</span>
+                    <span class="tech-badge">Database</span>
+                </div>
                 <button class="demo-button">了解更多</button>
             </div>
 
@@ -231,7 +364,15 @@
                 <p class="feature-description">
                     集成Reddit、Discourse等论坛内容，结合AI生成和社区数据，提供全面的乒乓球问答服务。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 5 (Week 6-8)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">Web Scraping</span>
+                    <span class="tech-badge">Hybrid Retrieval</span>
+                    <span class="tech-badge">Community Data</span>
+                </div>
                 <button class="demo-button">探索社区</button>
             </div>
 
@@ -242,7 +383,15 @@
                 <p class="feature-description">
                     丰富的训练PDF、视频教程、FAQ等学习资源，帮助不同水平的玩家提升技能。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 6 (Week 7-9)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">Content Management</span>
+                    <span class="tech-badge">Search Engine</span>
+                    <span class="tech-badge">Categorization</span>
+                </div>
                 <button class="demo-button">浏览资源</button>
             </div>
 
@@ -253,7 +402,15 @@
                 <p class="feature-description">
                     结合球体追踪和AI分析，提供实时的训练数据分析和改进建议。
                 </p>
-                <span class="feature-status status-developing">🔄 开发中</span>
+                <div class="feature-details">
+                    <span class="feature-status status-developing">🔄 开发中</span>
+                    <span class="phase-info">Phase 7 (Week 8-10)</span>
+                </div>
+                <div class="tech-info">
+                    <span class="tech-badge">Performance Analysis</span>
+                    <span class="tech-badge">Real-time Monitoring</span>
+                    <span class="tech-badge">AI Suggestions</span>
+                </div>
                 <button class="demo-button">开始分析</button>
             </div>
         </div>
@@ -272,6 +429,52 @@
             </div>
         </div>
 
+        <div class="team-section">
+            <h3>团队分工</h3>
+            <div class="team-grid">
+                <div class="team-card">
+                    <span class="team-icon">🧠</span>
+                    <h4>LLM Engineer</h4>
+                    <p>LLM/core/, RAG pipeline</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">👁️</span>
+                    <h4>CV Engineer</h4>
+                    <p>Ball_Tracking/, YOLO models</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">📊</span>
+                    <h4>Data Engineer</h4>
+                    <p>Equipment_Recommendation/, algorithms</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">🌐</span>
+                    <h4>Backend Engineer</h4>
+                    <p>Social_Media/, forum integration</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">📚</span>
+                    <h4>Content Manager</h4>
+                    <p>Learning_Resources/, content curation</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">🤖</span>
+                    <h4>ML Engineer</h4>
+                    <p>Training_Analysis/, performance analysis</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">🎨</span>
+                    <h4>Frontend Developer</h4>
+                    <p>frontend/, responsive UI</p>
+                </div>
+                <div class="team-card">
+                    <span class="team-icon">⚙️</span>
+                    <h4>DevOps Engineer</h4>
+                    <p>docker/, deployment, CI/CD</p>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
             <p>© 2024 Pingpong AI Platform. 让AI重新定义乒乓球学习体验</p>
         </div>
@@ -282,17 +485,66 @@
             // 这里可以添加具体的功能实现
             console.log(`Opening feature: ${feature}`);
             
-            // 示例：显示功能详情
-            const featureNames = {
-                'llm': 'LLM 智能学习助手',
-                'tracking': '球体追踪系统',
-                'equipment': '装备推荐系统',
-                'social': '社交媒体问答',
-                'learning': '乒乓球学习资源',
-                'analysis': '实时训练分析'
+            // 功能详情配置
+            const featureDetails = {
+                'llm': {
+                    name: 'LLM 智能学习助手',
+                    phase: 'Phase 2 (Week 3-5)',
+                    description: '基于RAG技术的智能问答系统，处理中文PDF文档',
+                    tech: ['LangChain', 'FAISS', 'OCR', 'OpenAI'],
+                    status: '开发中'
+                },
+                'tracking': {
+                    name: '球体追踪系统',
+                    phase: 'Phase 3 (Week 4-6)',
+                    description: '使用YOLO和计算机视觉技术，实时追踪乒乓球运动轨迹',
+                    tech: ['YOLO', 'OpenCV', 'Computer Vision'],
+                    status: '开发中'
+                },
+                'equipment': {
+                    name: '装备推荐系统',
+                    phase: 'Phase 4 (Week 5-7)',
+                    description: '基于用户需求和技能水平，提供个性化的乒乓球装备推荐',
+                    tech: ['Recommendation Engine', 'User Profiling', 'Database'],
+                    status: '开发中'
+                },
+                'social': {
+                    name: '社交媒体问答',
+                    phase: 'Phase 5 (Week 6-8)',
+                    description: '集成Reddit、Discourse等论坛内容，结合AI生成和社区数据',
+                    tech: ['Web Scraping', 'Hybrid Retrieval', 'Community Data'],
+                    status: '开发中'
+                },
+                'learning': {
+                    name: '乒乓球学习资源',
+                    phase: 'Phase 6 (Week 7-9)',
+                    description: '丰富的训练PDF、视频教程、FAQ等学习资源',
+                    tech: ['Content Management', 'Search Engine', 'Categorization'],
+                    status: '开发中'
+                },
+                'analysis': {
+                    name: '实时训练分析',
+                    phase: 'Phase 7 (Week 8-10)',
+                    description: '结合球体追踪和AI分析，提供实时的训练数据分析和改进建议',
+                    tech: ['Performance Analysis', 'Real-time Monitoring', 'AI Suggestions'],
+                    status: '开发中'
+                }
             };
             
-            alert(`即将进入 ${featureNames[feature]} 功能模块！\n\n这是演示版本，实际功能正在开发中。`);
+            const detail = featureDetails[feature];
+            const message = `
+🏓 ${detail.name}
+
+📅 开发阶段: ${detail.phase}
+🔧 技术栈: ${detail.tech.join(', ')}
+📝 功能描述: ${detail.description}
+🔄 当前状态: ${detail.status}
+
+这是演示版本，实际功能正在开发中。
+预计完成时间请参考开发计划。
+            `;
+            
+            alert(message);
         }
 
         // 添加一些交互效果
