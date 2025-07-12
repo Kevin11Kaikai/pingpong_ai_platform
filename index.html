@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏓 Pingpong AI Platform - 智能乒乓球平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-ready {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-developing {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-planned {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .demo-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        .tech-stack {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tech-stack h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tech-tag {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏓 Pingpong AI Platform</h1>
+            <p>智能乒乓球平台 - 让AI助力你的乒乓球之旅</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- LLM 智能学习助手 -->
+            <div class="feature-card" onclick="openFeature('llm')">
+                <span class="feature-icon">🧠</span>
+                <h3 class="feature-title">LLM 智能学习助手</h3>
+                <p class="feature-description">
+                    基于RAG技术的智能问答系统，处理中文PDF文档，提供专业的乒乓球训练指导和技术分析。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">体验演示</button>
+            </div>
+
+            <!-- 球体追踪系统 -->
+            <div class="feature-card" onclick="openFeature('tracking')">
+                <span class="feature-icon">🎯</span>
+                <h3 class="feature-title">球体追踪系统</h3>
+                <p class="feature-description">
+                    使用YOLO和计算机视觉技术，实时追踪乒乓球运动轨迹，分析球的运动模式和速度。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">查看演示</button>
+            </div>
+
+            <!-- 装备推荐系统 -->
+            <div class="feature-card" onclick="openFeature('equipment')">
+                <span class="feature-icon">🏓</span>
+                <h3 class="feature-title">装备推荐系统</h3>
+                <p class="feature-description">
+                    基于用户需求和技能水平，提供个性化的乒乓球装备推荐，包括球拍、胶皮、球台等。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">了解更多</button>
+            </div>
+
+            <!-- 社交媒体问答 -->
+            <div class="feature-card" onclick="openFeature('social')">
+                <span class="feature-icon">🌐</span>
+                <h3 class="feature-title">社交媒体问答</h3>
+                <p class="feature-description">
+                    集成Reddit、Discourse等论坛内容，结合AI生成和社区数据，提供全面的乒乓球问答服务。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">探索社区</button>
+            </div>
+
+            <!-- 乒乓球学习资源 -->
+            <div class="feature-card" onclick="openFeature('learning')">
+                <span class="feature-icon">📚</span>
+                <h3 class="feature-title">乒乓球学习资源</h3>
+                <p class="feature-description">
+                    丰富的训练PDF、视频教程、FAQ等学习资源，帮助不同水平的玩家提升技能。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">浏览资源</button>
+            </div>
+
+            <!-- 实时训练分析 -->
+            <div class="feature-card" onclick="openFeature('analysis')">
+                <span class="feature-icon">📊</span>
+                <h3 class="feature-title">实时训练分析</h3>
+                <p class="feature-description">
+                    结合球体追踪和AI分析，提供实时的训练数据分析和改进建议。
+                </p>
+                <span class="feature-status status-developing">🔄 开发中</span>
+                <button class="demo-button">开始分析</button>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h3>技术栈</h3>
+            <div class="tech-tags">
+                <span class="tech-tag">FastAPI</span>
+                <span class="tech-tag">LangChain</span>
+                <span class="tech-tag">OpenAI</span>
+                <span class="tech-tag">FAISS</span>
+                <span class="tech-tag">YOLO</span>
+                <span class="tech-tag">Computer Vision</span>
+                <span class="tech-tag">RAG</span>
+                <span class="tech-tag">OCR</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Pingpong AI Platform. 让AI重新定义乒乓球学习体验</p>
+        </div>
+    </div>
+
+    <script>
+        function openFeature(feature) {
+            // 这里可以添加具体的功能实现
+            console.log(`Opening feature: ${feature}`);
+            
+            // 示例：显示功能详情
+            const featureNames = {
+                'llm': 'LLM 智能学习助手',
+                'tracking': '球体追踪系统',
+                'equipment': '装备推荐系统',
+                'social': '社交媒体问答',
+                'learning': '乒乓球学习资源',
+                'analysis': '实时训练分析'
+            };
+            
+            alert(`即将进入 ${featureNames[feature]} 功能模块！\n\n这是演示版本，实际功能正在开发中。`);
+        }
+
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 
