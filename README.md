@@ -188,6 +188,7 @@ pingpong_ai_platform/
 - `Ball_Tracking/api/tracking_api.py`: Tracking API endpoints
 
 **并行任务**:
+- 让用户上传视频
 - Data Engineer: 收集乒乓球视频数据
 - Frontend Developer: 设计视频播放和分析界面
 
