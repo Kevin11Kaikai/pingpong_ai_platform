@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     equipment_max_compare_items: int = 5
     equipment_recommendation_top_k: int = 5
 
+    # Social Media Configuration
+    social_media_scrape_enabled: bool = True
+    social_media_default_interval_minutes: int = 60
+    social_media_max_items_per_scrape: int = 100
+    social_media_analysis_batch_size: int = 50
+    social_media_reply_max_length: int = 500
+    social_media_reply_default_style: str = "professional"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

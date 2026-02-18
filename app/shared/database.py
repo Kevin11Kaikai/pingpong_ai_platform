@@ -91,6 +91,10 @@ async def init_db() -> None:
         EquipmentCategory, Brand, Equipment,
         UserEquipmentProfile, EquipmentReview, EquipmentRecommendation
     )
+    from app.social_media.models import (
+        SocialPlatformConfig, ScrapeTask, SocialContent,
+        ContentTag, ContentTagMapping, ReplySuggestion
+    )
 
     engine = get_engine()
     async with engine.begin() as conn:
