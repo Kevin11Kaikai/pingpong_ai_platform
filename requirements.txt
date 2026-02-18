@@ -14,3 +14,19 @@ httpx>=0.27.0
 pytest>=8.3.0
 pytest-asyncio>=0.24.0
 ruff>=0.7.0
+
+# Ball Tracking (BlurBall) Dependencies
+opencv-python>=4.9.0
+hydra-core>=1.3.2
+omegaconf>=2.3.0
+pytorch-lightning>=2.3.0
+lightning>=2.3.0
+timm>=0.9.16
+einops>=0.7.0
+scipy>=1.13.0
+scikit-image>=0.23.1
+imageio>=2.34.0
+matplotlib>=3.9.0
+shapely>=2.0.4
+python-multipart>=0.0.9
+aiofiles>=24.1.0

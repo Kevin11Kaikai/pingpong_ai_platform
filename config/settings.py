@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -25,6 +26,20 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440
+
+    # Ball Tracking Configuration
+    ball_tracking_upload_dir: str = "./data/uploads/videos"
+    ball_tracking_output_dir: str = "./data/outputs/ball_tracking"
+    ball_tracking_max_file_size_mb: int = 500
+
+    # BlurBall Model Paths
+    blurball_config_name: str = "inference_blurball"
+    blurball_checkpoint_path: str = "./external/blurball/checkpoints/blurball.ckpt"
+
+    # Ball Tracking Processing
+    ball_tracking_batch_size: int = 16
+    ball_tracking_detection_threshold: float = 0.5
+    ball_tracking_max_gap_frames: int = 5
 
     class Config:
         env_file = ".env"

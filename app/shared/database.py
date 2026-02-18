@@ -47,6 +47,22 @@ def get_session_factory():
     return _session_factory
 
 
+# 别名，供后台任务使用
+async_session_factory = property(lambda _: get_session_factory())
+
+
+class _SessionFactoryProxy:
+    """会话工厂代理，允许直接使用 async_session_factory() 创建会话"""
+    def __call__(self):
+        return get_session_factory()()
+
+    def __aenter__(self):
+        return get_session_factory().__aenter__()
+
+
+async_session_factory = get_session_factory
+
+
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     依赖注入：获取数据库会话
@@ -69,11 +85,12 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 async def init_db() -> None:
     """初始化数据库表结构"""
     # 延迟导入避免循环依赖
-    from app.llm.models import Base as LLMBase
+    from app.llm.models import Conversation, Message, Document
+    from app.ball_tracking.models import ProcessingJob, BallTrack2D, VisualizationOutput
 
     engine = get_engine()
     async with engine.begin() as conn:
-        await conn.run_sync(LLMBase.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all)
     logger.info("数据库表结构初始化完成")
 
 
