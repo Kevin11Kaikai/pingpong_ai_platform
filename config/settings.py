@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     ball_tracking_detection_threshold: float = 0.5
     ball_tracking_max_gap_frames: int = 5
 
+    # Equipment Recommendation Configuration
+    equipment_image_dir: str = "./data/uploads/equipment"
+    equipment_default_page_size: int = 20
+    equipment_max_compare_items: int = 5
+    equipment_recommendation_top_k: int = 5
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

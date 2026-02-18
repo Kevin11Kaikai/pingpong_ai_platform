@@ -87,6 +87,10 @@ async def init_db() -> None:
     # 延迟导入避免循环依赖
     from app.llm.models import Conversation, Message, Document
     from app.ball_tracking.models import ProcessingJob, BallTrack2D, VisualizationOutput
+    from app.equipment_recommendation.models import (
+        EquipmentCategory, Brand, Equipment,
+        UserEquipmentProfile, EquipmentReview, EquipmentRecommendation
+    )
 
     engine = get_engine()
     async with engine.begin() as conn:
