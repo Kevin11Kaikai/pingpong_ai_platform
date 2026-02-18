@@ -9,6 +9,7 @@ from app.learning_resources.api import router as learning_router
 from app.llm.api import router as llm_router
 from app.social_media.api import router as social_media_router
 from app.training_analysis.api import router as training_router
+from app.shared.database import init_db, close_db
 from config.logging import setup_logging
 
 
@@ -18,9 +19,15 @@ async def lifespan(app: FastAPI):
     # 启动时
     setup_logging()
     logger.info("Pingpong AI Platform 启动中...")
+
+    # 初始化数据库
+    await init_db()
+    logger.info("数据库初始化完成")
+
     logger.info("所有模块 router 已注册")
     yield
     # 关闭时
+    await close_db()
     logger.info("Pingpong AI Platform 关闭")
 
 
