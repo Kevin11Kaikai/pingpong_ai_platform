@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # BlurBall Model Paths
     blurball_config_name: str = "inference_blurball"
-    blurball_checkpoint_path: str = "./external/blurball/checkpoints/blurball.ckpt"
+    blurball_checkpoint_path: str = "./external/blurball/checkpoints/blurball_best"
 
     # Ball Tracking Processing
     ball_tracking_batch_size: int = 16
