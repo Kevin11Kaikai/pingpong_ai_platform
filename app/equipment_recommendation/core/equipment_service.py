@@ -302,16 +302,16 @@ class EquipmentService:
             query = query.where(Equipment.is_featured == params.is_featured)
 
         # 适合的打法/水平筛选 (JSON 字段)
-        # 注意：SQLite 的 JSON 支持有限，这里用简单的字符串包含匹配
+        # SQLite JSON 字段使用 LIKE 匹配
         if params.suitable_styles:
             for style in params.suitable_styles:
                 query = query.where(
-                    Equipment.suitable_styles.cast(str).contains(style)
+                    func.json_extract(Equipment.suitable_styles, '$').like(f'%"{style}"%')
                 )
         if params.suitable_levels:
             for level in params.suitable_levels:
                 query = query.where(
-                    Equipment.suitable_levels.cast(str).contains(level)
+                    func.json_extract(Equipment.suitable_levels, '$').like(f'%"{level}"%')
                 )
 
         # 排序
