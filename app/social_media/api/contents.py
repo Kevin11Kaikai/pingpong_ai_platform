@@ -160,15 +160,32 @@ async def semantic_search(
     )
 
 
+def _get_reply_count(content) -> int:
+    """安全获取回复数量，处理未加载的关系"""
+    from sqlalchemy.orm import attributes
+
+    # 检查 reply_suggestions 是否已加载
+    state = attributes.instance_state(content)
+    if "reply_suggestions" in state.dict:
+        return len(content.reply_suggestions) if content.reply_suggestions else 0
+    return 0
+
+
+def _get_platform(content) -> str:
+    """安全获取平台名称"""
+    from sqlalchemy.orm import attributes
+
+    state = attributes.instance_state(content)
+    if "platform_config" in state.dict and content.platform_config:
+        return content.platform_config.platform.value
+    return "unknown"
+
+
 def _to_content_brief(content) -> ContentBrief:
     """转换为简要信息"""
-    platform = "unknown"
-    if content.platform_config:
-        platform = content.platform_config.platform.value
-
     return ContentBrief(
         id=content.id,
-        platform=platform,
+        platform=_get_platform(content),
         content_type=content.content_type.value,
         title=content.title,
         content_preview=content.content[:100] + "..." if len(content.content) > 100 else content.content,
@@ -177,20 +194,16 @@ def _to_content_brief(content) -> ContentBrief:
         quality_score=content.quality_score,
         like_count=content.like_count,
         comment_count=content.comment_count,
-        reply_count=len(content.reply_suggestions) if content.reply_suggestions else 0,
+        reply_count=_get_reply_count(content),
         created_at=content.created_at,
     )
 
 
 def _to_content_response(content) -> ContentResponse:
     """转换为完整响应"""
-    platform = "unknown"
-    if content.platform_config:
-        platform = content.platform_config.platform.value
-
     return ContentResponse(
         id=content.id,
-        platform=platform,
+        platform=_get_platform(content),
         content_type=content.content_type.value,
         title=content.title,
         content=content.content,
@@ -209,7 +222,7 @@ def _to_content_response(content) -> ContentResponse:
         quality_score=content.quality_score,
         relevance_score=content.relevance_score,
         analysis_result=content.analysis_result,
-        reply_suggestion_count=len(content.reply_suggestions) if content.reply_suggestions else 0,
+        reply_suggestion_count=_get_reply_count(content),
         created_at=content.created_at,
         updated_at=content.updated_at,
     )

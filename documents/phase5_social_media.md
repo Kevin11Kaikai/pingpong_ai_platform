@@ -519,17 +519,23 @@ pytest tests/test_social_media.py::TestContentService -v
 | TestReplyService | 3 | 回复质量评估 |
 | TestAnalysisService | 2 | 分析结果解析 |
 | TestScraperService | 1 | 知乎内容解析 |
-| **Total** | **21** | |
+| TestContentServiceIntegration | 5 | 内容 CRUD 集成测试 |
+| TestHealthAPI | 2 | 健康检查 API |
+| TestContentsAPI | 10 | 内容管理 API (CRUD, 搜索) |
+| TestAnalysisAPI | 2 | 内容分析 API |
+| TestRepliesAPI | 5 | 回复建议 API |
+| TestScrapeAPI | 9 | 抓取任务 API |
+| **Total** | **54** | |
 
 ### 7.3 测试结果
 
 ```
-tests/test_social_media.py::TestSchemas::test_content_create_valid PASSED
-tests/test_social_media.py::TestSchemas::test_content_create_invalid_platform PASSED
-tests/test_social_media.py::TestSchemas::test_content_create_empty_content PASSED
+pytest tests/test_social_media.py -v
 ...
-================ 21 passed in 6.10s ================
+=============== 53 passed, 1 skipped in 9.95s ================
 ```
+
+**注意**: 1 个测试 (test_create_scrape_task_success) 因后台任务在测试环境中的 greenlet 问题被跳过。
 
 ---
 
