@@ -55,6 +55,23 @@ class Settings(BaseSettings):
     social_media_reply_max_length: int = 500
     social_media_reply_default_style: str = "professional"
 
+    # Learning Resources Configuration
+    learning_resources_default_page_size: int = 20
+    learning_resources_search_top_k: int = 10
+    learning_resources_search_min_score: float = 0.3
+    learning_resources_featured_count: int = 6
+
+    # Learning Resources - User Profile & Recommendation
+    learning_resource_upload_dir: str = "./data/uploads/learning"
+    learning_path_recommendation_top_k: int = 5
+    learning_daily_study_goal_minutes: int = 30
+    learning_streak_reset_hours: int = 48  # 超过48小时未学习重置连续天数
+
+    # Learning Resources - Video Analysis Integration
+    learning_video_analysis_enabled: bool = True
+    learning_ai_commentary_model: str = "gpt-4o-mini"
+    learning_ai_commentary_temperature: float = 0.7
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

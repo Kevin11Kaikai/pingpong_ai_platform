@@ -95,6 +95,10 @@ async def init_db() -> None:
         SocialPlatformConfig, ScrapeTask, SocialContent,
         ContentTag, ContentTagMapping, ReplySuggestion
     )
+    from app.learning_resources.models import (
+        LearningResource, LearningPath, LearningPathItem,
+        UserProgress, ResourceBookmark
+    )
 
     engine = get_engine()
     async with engine.begin() as conn:
