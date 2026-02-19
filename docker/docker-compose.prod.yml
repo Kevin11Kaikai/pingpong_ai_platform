@@ -37,8 +37,8 @@ services:
       dockerfile: docker/Dockerfile.prod
     image: pingpong-api:latest
     container_name: pingpong-api
-    expose:
-      - "8000"
+    ports:
+      - "8001:8000"
     volumes:
       # Data persistence
       - pingpong-data:/app/data

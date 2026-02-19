@@ -55,8 +55,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# 创建非 root 用户
-RUN groupadd -r pingpong && useradd -r -g pingpong pingpong
+# 创建非 root 用户（含 home 目录，用于 HuggingFace 模型缓存）
+RUN groupadd -r pingpong && useradd -r -g pingpong -m -d /home/pingpong pingpong
 
 # 复制虚拟环境
 COPY --from=builder /opt/venv /opt/venv
@@ -71,7 +71,7 @@ RUN mkdir -p /app/data /app/logs /app/app/vectorstore && \
 # 复制应用代码
 COPY --chown=pingpong:pingpong app/ ./app/
 COPY --chown=pingpong:pingpong config/ ./config/
-COPY --chown=pingpong:pingpong external/ ./external/
+COPY --chown=pingpong:pingpong frontend/ ./frontend/
 
 # 切换到非 root 用户
 USER pingpong
@@ -83,10 +83,10 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/api/health/ || exit 1
 
-# 启动命令 (2 workers for production)
+# 启动命令
 CMD ["python3", "-m", "uvicorn", "app.main:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
-     "--workers", "2", \
+     "--workers", "1", \
      "--proxy-headers", \
      "--forwarded-allow-ips", "*"]

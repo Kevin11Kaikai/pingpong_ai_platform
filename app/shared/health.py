@@ -11,7 +11,7 @@ from typing import Optional
 from loguru import logger
 from pydantic import BaseModel
 
-from app.shared.database import get_db_session
+from app.shared.database import get_session_factory
 
 
 class HealthStatus(str, Enum):
@@ -50,8 +50,10 @@ async def check_database() -> ComponentHealth:
     """检查数据库连接"""
     start = time.time()
     try:
-        async with get_db_session() as session:
-            result = await session.execute("SELECT 1")
+        from sqlalchemy import text
+        session_factory = get_session_factory()
+        async with session_factory() as session:
+            result = await session.execute(text("SELECT 1"))
             _ = result.scalar()
         latency = (time.time() - start) * 1000
         return ComponentHealth(
