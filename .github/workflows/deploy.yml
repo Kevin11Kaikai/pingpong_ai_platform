@@ -1,0 +1,58 @@
+# =============================================================================
+# Deploy Workflow - Pingpong AI Platform
+# Manual deployment to staging/production environments
+# =============================================================================
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/pingpong-ai
+            git fetch origin
+            git checkout ${{ github.sha }}
+
+            # Update environment file
+            cp .env.${{ github.event.inputs.environment }} .env.production
+
+            # Pull latest image and restart
+            docker compose -f docker/docker-compose.prod.yml pull
+            docker compose -f docker/docker-compose.prod.yml up -d --remove-orphans
+
+            # Wait for health check
+            sleep 30
+            curl -f http://localhost/api/health/ || exit 1
+
+            # Cleanup old images
+            docker image prune -f
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "Deployment to ${{ github.event.inputs.environment }} completed successfully"
+          echo "Commit: ${{ github.sha }}"

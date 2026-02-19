@@ -1,0 +1,62 @@
+# =============================================================================
+# Test Workflow - Pingpong AI Platform
+# Runs on every push/PR to main/develop branches
+# =============================================================================
+
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install prometheus-client>=0.19.0
+
+      - name: Run Ruff linter
+        run: |
+          pip install ruff
+          ruff check . --output-format=github
+
+      - name: Run tests
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY || 'test-key' }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'test-jwt-secret-key-for-testing' }}
+          APP_ENV: testing
+          DATABASE_URL: sqlite+aiosqlite:///./test.db
+        run: |
+          pytest tests/ -v \
+            --ignore=tests/test_ball_tracking.py \
+            --ignore=tests/test_gpu_integration.py \
+            -m "not gpu" \
+            --tb=short \
+            --cov=app \
+            --cov-report=xml \
+            --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+        continue-on-error: true

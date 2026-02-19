@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>训练分析 - 乒乓 AI</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">训练分析</h1>
+          <p class="page-subtitle">记录和分析您的训练数据</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="TrainingPage.showNewSessionModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            记录训练
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="training-layout">
+          <!-- 主内容区 -->
+          <div>
+            <!-- 统计概览 -->
+            <section class="mb-lg">
+              <div class="grid grid-cols-4 gap-md" id="statsOverview">
+                <!-- 由 JS 填充 -->
+              </div>
+            </section>
+
+            <!-- 趋势图表 -->
+            <section class="mb-lg">
+              <div class="card training-chart-card">
+                <div class="card-header">
+                  <h3 class="card-title">训练趋势</h3>
+                  <div class="flex gap-sm">
+                    <select id="metricSelect" class="form-input form-select" style="width: auto;" onchange="TrainingPage.loadTrends()">
+                      <option value="duration">训练时长</option>
+                      <option value="intensity">训练强度</option>
+                      <option value="performance">表现评分</option>
+                    </select>
+                    <select id="periodSelect" class="form-input form-select" style="width: auto;" onchange="TrainingPage.loadTrends()">
+                      <option value="week">最近一周</option>
+                      <option value="month" selected>最近一月</option>
+                      <option value="year">最近一年</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart-container">
+                    <canvas id="trendsChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 训练会话列表 -->
+            <section>
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">训练记录</h3>
+                  <a href="#" class="text-primary text-sm" onclick="TrainingPage.showAllSessions()">查看全部</a>
+                </div>
+                <div class="card-body session-list" id="sessionList">
+                  <!-- 由 JS 填充 -->
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- 侧边栏 -->
+          <aside>
+            <!-- 连续训练天数 -->
+            <div class="card mb-md">
+              <div class="card-body text-center">
+                <div class="text-3xl font-bold text-primary mb-xs" id="streakDays">0</div>
+                <div class="text-sm text-secondary">连续训练天数</div>
+                <div class="text-xs text-tertiary mt-sm" id="streakInfo">继续加油！</div>
+              </div>
+            </div>
+
+            <!-- 目标管理 -->
+            <div class="card mb-md">
+              <div class="card-header">
+                <h3 class="card-title">我的目标</h3>
+                <button class="btn btn-ghost btn-sm" onclick="TrainingPage.showNewGoalModal()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="card-body" id="goalsList">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+
+            <!-- AI 洞察 -->
+            <div class="insights-card" id="insightsCard">
+              <h4>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                AI 训练建议
+              </h4>
+              <div id="insightsList">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/training.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/modal.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/pages/training.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
