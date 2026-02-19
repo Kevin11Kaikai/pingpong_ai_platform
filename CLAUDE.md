@@ -61,4 +61,39 @@ Phase 1: 基础架构 → Phase 2: LLM/RAG → Phase 3: Ball Tracking (BlurBall+
 - 启动: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - 测试: pytest tests/ -v
 - Lint: ruff check .
-- Docker: docker compose -f docker/docker-compose.yml up --build
+- Docker 构建: docker compose -f docker/docker-compose.prod.yml build
+- Docker 启动: docker compose -f docker/docker-compose.prod.yml up -d
+- Docker 状态: docker ps --format "table {{.Names}}\t{{.Status}}"
+- Docker 日志: docker logs pingpong-api --tail 50
+
+## 当前进度（2026-02-19）
+
+### 已完成
+- Phase 1-10 全部开发完成，191 个 API 路由，前端 11 个页面
+- 本地 Docker Desktop 部署完成，4 容器全部 healthy：
+  - pingpong-api (FastAPI, port 8001:8000)
+  - pingpong-nginx (反向代理, port 80)
+  - pingpong-prometheus (监控, port 9090)
+  - pingpong-grafana (仪表盘, port 3000)
+- 部署过程中修复 3 个 bug：
+  1. Dockerfile COPY 错误：external/ → frontend/（前端文件缺失导致 404）
+  2. health.py async generator 误用：get_db_session() 不能直接 async with，改用 get_session_factory()
+  3. 非 root 用户缺 home 目录：useradd 加 -m -d /home/pingpong，解决 HuggingFace 模型缓存权限问题
+- 全部技术文档完成并推送 GitHub：
+  - documents/phase1_infrastructure_guide.md ~ phase10_deployment.md（共 10 份）
+  - documents/windows_docker_desktop.md（Docker 部署指南，含原理深度讲解）
+  - README.md 已重写（项目概览、架构图、Quick Start、API 总览、统计）
+- Git 远程: origin → https://github.com/Kevin11Kaikai/pingpong_ai_platform.git
+- 分支: master (本地) → PingPong_2026 (远程跟踪)
+
+### 已知问题
+- 多 worker 404 bug：Uvicorn --workers 2 时 POST /api/llm/chat 间歇性 404，临时改为 --workers 1 规避。根因疑似多进程路由注册不一致，需切 Gunicorn+UvicornWorker 或迁移 PostgreSQL
+- Embedding 模型未预加载：首次调用有延迟，/api/health/full 显示 embedding 组件 degraded
+- 部分端点返回 404：/api/social-media/topics 和 /api/learning/profiles/test-user，疑似缺少数据 seeding 或模块初始化
+
+### 下一步可选
+- 修复多 worker bug（Gunicorn 适配或路由注册审查）
+- Embedding 启动时预加载（消除 degraded 状态）
+- HTTPS 配置（Let's Encrypt / self-signed）
+- 数据 seeding 脚本（补全 social-media 和 learning 初始数据）
+- 云服务器部署（如果有远程 Linux 机器）
