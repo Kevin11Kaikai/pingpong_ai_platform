@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 助手 - 乒乓 AI</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+  <!-- Marked.js for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <div class="chat-layout">
+        <!-- 对话列表侧边栏 -->
+        <aside class="chat-sidebar" id="chatSidebar">
+          <div class="chat-sidebar-header">
+            <button class="btn btn-primary btn-block" onclick="ChatPage.createConversation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              新建对话
+            </button>
+          </div>
+          <div class="chat-list" id="conversationList">
+            <!-- 由 JS 填充 -->
+          </div>
+          <div class="sidebar-footer" style="padding: 12px;">
+            <button class="btn btn-ghost btn-sm btn-block" onclick="ChatPage.openDocuments()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+              </svg>
+              知识库管理
+            </button>
+          </div>
+        </aside>
+
+        <!-- 聊天主区域 -->
+        <div class="chat-main">
+          <header class="page-header">
+            <div class="flex items-center gap-md">
+              <button class="mobile-menu-btn" onclick="ChatPage.toggleSidebar()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+              <div>
+                <h1 class="page-title" id="chatTitle">AI 助手</h1>
+                <p class="page-subtitle" id="chatSubtitle">选择或创建一个对话开始</p>
+              </div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-ghost" id="btnDeleteConversation" style="display: none;" onclick="ChatPage.deleteCurrentConversation()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          <!-- 消息列表 -->
+          <div class="chat-messages" id="messageList">
+            <div class="empty-state" id="emptyState">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              <div class="empty-state-title">开始对话</div>
+              <div class="empty-state-desc">向 AI 助手提问关于乒乓球的任何问题</div>
+            </div>
+          </div>
+
+          <!-- 输入区域 -->
+          <div class="chat-input-area">
+            <div class="chat-input-wrapper">
+              <textarea
+                id="messageInput"
+                class="chat-input"
+                placeholder="输入消息，按 Enter 发送，Shift+Enter 换行..."
+                rows="1"
+                onkeydown="ChatPage.handleInputKeydown(event)"
+                oninput="ChatPage.autoResize(this)"
+              ></textarea>
+              <button class="btn btn-primary" id="sendBtn" onclick="ChatPage.sendMessage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 知识库弹窗 -->
+  <div id="documentsModal" style="display: none;">
+    <div class="card-header">
+      <h3 class="card-title">知识库文档</h3>
+      <div>
+        <input type="file" id="documentUpload" style="display: none;" accept=".txt,.md,.pdf" onchange="ChatPage.uploadDocument(event)">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('documentUpload').click()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          上传文档
+        </button>
+      </div>
+    </div>
+    <div class="card-body" id="documentList" style="max-height: 400px; overflow-y: auto;">
+      <!-- 由 JS 填充 -->
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/llm.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/modal.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/pages/chat.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

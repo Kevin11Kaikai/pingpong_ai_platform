@@ -1,6 +1,10 @@
+import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from loguru import logger
 
 from app.ball_tracking.api import router as ball_tracking_router
@@ -38,6 +42,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS 中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 开发阶段允许所有来源
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 注册各模块 router
 app.include_router(llm_router, prefix="/api/llm", tags=["LLM"])
 app.include_router(ball_tracking_router, prefix="/api/ball-tracking", tags=["Ball Tracking"])
@@ -51,3 +64,38 @@ app.include_router(training_router, prefix="/api/training", tags=["Training Anal
 async def health_check():
     """全局健康检查"""
     return {"status": "healthy", "version": "0.1.0"}
+
+
+# 静态文件服务 - 前端
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+
+if os.path.exists(FRONTEND_DIR):
+    # 挂载静态文件
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+    @app.get("/")
+    async def serve_index():
+        """提供首页"""
+        index_path = os.path.join(FRONTEND_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        raise HTTPException(status_code=404, detail="Frontend not found")
+
+    @app.get("/{path:path}")
+    async def serve_pages(path: str):
+        """提供页面路由"""
+        # API 路由跳过
+        if path.startswith("api/") or path.startswith("static/"):
+            raise HTTPException(status_code=404)
+
+        # 尝试返回对应 HTML
+        html_path = os.path.join(FRONTEND_DIR, "pages", f"{path}.html")
+        if os.path.exists(html_path):
+            return FileResponse(html_path)
+
+        # 回退到 index.html (SPA 支持)
+        index_path = os.path.join(FRONTEND_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+
+        raise HTTPException(status_code=404, detail="Page not found")

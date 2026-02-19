@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>装备推荐 - 乒乓 AI</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">装备推荐</h1>
+          <p class="page-subtitle">根据您的水平和偏好，找到最适合的装备</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="EquipmentPage.showRecommendModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            获取推荐
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="equipment-layout">
+          <!-- 筛选侧边栏 -->
+          <aside class="equipment-filters card">
+            <h3 class="card-title mb-md">筛选条件</h3>
+
+            <!-- 搜索 -->
+            <div class="form-group">
+              <div class="search-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="searchInput" class="form-input" placeholder="搜索装备..." oninput="EquipmentPage.handleSearch()">
+              </div>
+            </div>
+
+            <!-- 分类 -->
+            <div class="filter-section">
+              <div class="filter-title">装备分类</div>
+              <div class="checkbox-group" id="categoryFilters">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="blade" onchange="EquipmentPage.handleFilterChange()"> 底板
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="rubber" onchange="EquipmentPage.handleFilterChange()"> 胶皮
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="ball" onchange="EquipmentPage.handleFilterChange()"> 球
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="accessory" onchange="EquipmentPage.handleFilterChange()"> 配件
+                </label>
+              </div>
+            </div>
+
+            <!-- 品牌 -->
+            <div class="filter-section">
+              <div class="filter-title">品牌</div>
+              <select id="brandFilter" class="form-input form-select" onchange="EquipmentPage.handleFilterChange()">
+                <option value="">全部品牌</option>
+              </select>
+            </div>
+
+            <!-- 价格范围 -->
+            <div class="filter-section">
+              <div class="filter-title">价格范围</div>
+              <div class="flex gap-sm items-center">
+                <input type="number" id="minPrice" class="form-input" placeholder="最低" style="width: 80px;" oninput="EquipmentPage.handleFilterChange()">
+                <span>-</span>
+                <input type="number" id="maxPrice" class="form-input" placeholder="最高" style="width: 80px;" oninput="EquipmentPage.handleFilterChange()">
+              </div>
+            </div>
+
+            <!-- 清除筛选 -->
+            <button class="btn btn-secondary btn-block mt-md" onclick="EquipmentPage.clearFilters()">清除筛选</button>
+          </aside>
+
+          <!-- 装备列表 -->
+          <div>
+            <div class="flex items-center justify-between mb-md">
+              <div class="text-sm text-secondary" id="resultCount">共 0 件装备</div>
+              <select id="sortSelect" class="form-input form-select" style="width: auto;" onchange="EquipmentPage.handleSortChange()">
+                <option value="relevance">默认排序</option>
+                <option value="price_asc">价格从低到高</option>
+                <option value="price_desc">价格从高到低</option>
+                <option value="rating">评分最高</option>
+                <option value="newest">最新上架</option>
+              </select>
+            </div>
+
+            <div class="equipment-grid" id="equipmentGrid">
+              <!-- 由 JS 填充 -->
+            </div>
+
+            <!-- 分页 -->
+            <div id="pagination" class="mt-lg"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 对比栏 -->
+      <div class="compare-bar" id="compareBar">
+        <div class="compare-items" id="compareItems"></div>
+        <div class="flex gap-sm">
+          <button class="btn btn-secondary" onclick="EquipmentPage.clearCompare()">清空</button>
+          <button class="btn btn-primary" onclick="EquipmentPage.showCompareModal()">
+            对比 (<span id="compareCount">0</span>)
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/equipment.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/modal.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/components/pagination.js"></script>
+  <script src="/static/js/pages/equipment.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
