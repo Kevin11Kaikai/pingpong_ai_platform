@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from typing import Optional
 
@@ -72,9 +72,24 @@ class Settings(BaseSettings):
     learning_ai_commentary_model: str = "gpt-4o-mini"
     learning_ai_commentary_temperature: float = 0.7
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # Training Analysis Configuration
+    training_analysis_default_page_size: int = 20
+    training_analysis_max_sessions_per_query: int = 100
+    training_analysis_snapshot_retention_days: int = 365
+    training_analysis_insight_retention_days: int = 90
+
+    # Training Analysis - AI Insight Generation
+    training_insight_model: str = "gpt-4o-mini"
+    training_insight_temperature: float = 0.7
+    training_insight_max_tokens: int = 1000
+
+    # Training Analysis - Metrics Calculation
+    training_metrics_speed_conversion_factor: float = 3.6  # m/s to km/h
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 @lru_cache

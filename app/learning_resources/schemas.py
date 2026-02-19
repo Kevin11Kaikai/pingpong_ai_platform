@@ -5,7 +5,7 @@
 
 from datetime import datetime
 from typing import Optional, List, Literal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 # ========== 枚举类型（Literal 轻量化用法） ==========
@@ -83,8 +83,7 @@ class ResourceBrief(BaseModel):
     status: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ResourceResponse(BaseModel):
@@ -109,8 +108,7 @@ class ResourceResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ResourceListResponse(BaseModel):
@@ -210,8 +208,7 @@ class LearningPathItemResponse(BaseModel):
     is_required: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LearningPathResponse(BaseModel):
@@ -232,8 +229,7 @@ class LearningPathResponse(BaseModel):
     updated_at: datetime
     items: Optional[List[LearningPathItemResponse]] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LearningPathBrief(BaseModel):
@@ -249,8 +245,7 @@ class LearningPathBrief(BaseModel):
     item_count: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LearningPathListResponse(BaseModel):
@@ -293,8 +288,7 @@ class UserProgressResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserProgressSummary(BaseModel):
@@ -334,8 +328,7 @@ class BookmarkResponse(BaseModel):
     resource: ResourceBrief
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BookmarkListResponse(BaseModel):
@@ -419,8 +412,7 @@ class KnowledgePointResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class KnowledgePointBrief(BaseModel):
@@ -433,8 +425,7 @@ class KnowledgePointBrief(BaseModel):
     level: int
     resource_count: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class KnowledgePointTreeNode(BaseModel):
@@ -447,8 +438,7 @@ class KnowledgePointTreeNode(BaseModel):
     resource_count: int
     children: List["KnowledgePointTreeNode"] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class KnowledgeRelationCreate(BaseModel):
@@ -472,8 +462,7 @@ class KnowledgeRelationResponse(BaseModel):
     to_point_name: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class KnowledgeGraphResponse(BaseModel):
@@ -535,8 +524,7 @@ class UserLearningProfileResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserPathEnrollmentResponse(BaseModel):
@@ -555,8 +543,7 @@ class UserPathEnrollmentResponse(BaseModel):
     completed_at: Optional[datetime]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 推荐 Schema ==========
@@ -630,8 +617,7 @@ class VideoAnalysisLinkResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TechniqueAnalysisRequest(BaseModel):

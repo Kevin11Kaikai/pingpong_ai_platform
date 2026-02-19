@@ -5,7 +5,7 @@ Ball Tracking 模块 Pydantic Schema
 
 from datetime import datetime
 from typing import Optional, List, Tuple, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ========== 基础类型 ==========
@@ -33,8 +33,7 @@ class VideoUploadResponse(BaseModel):
     status: Literal["queued", "processing", "completed", "failed"]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VideoMetadataResponse(BaseModel):
@@ -58,8 +57,7 @@ class ProcessingJobStatus(BaseModel):
     updated_at: datetime
     completed_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 检测和追踪相关 Schema ==========
@@ -96,8 +94,7 @@ class Track2DResponse(BaseModel):
     duration_ms: float
     point_count: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 分析相关 Schema ==========
@@ -150,8 +147,7 @@ class ProcessingResultResponse(BaseModel):
     frame_count: int
     detection_count: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 可视化相关 Schema ==========
@@ -173,8 +169,7 @@ class VisualizationResponse(BaseModel):
     file_size_bytes: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 列表查询响应 ==========
@@ -188,8 +183,7 @@ class JobListItem(BaseModel):
     created_at: datetime
     processing_time_seconds: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class JobListResponse(BaseModel):

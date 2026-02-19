@@ -5,7 +5,7 @@
 
 from datetime import datetime
 from typing import Optional, List, Literal, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ========== 枚举类型 ==========
@@ -50,8 +50,7 @@ class BrandResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BrandListResponse(BaseModel):
@@ -90,8 +89,7 @@ class CategoryResponse(BaseModel):
     sort_order: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CategoryTreeResponse(BaseModel):
@@ -103,8 +101,7 @@ class CategoryTreeResponse(BaseModel):
     sort_order: int
     subcategories: List["CategoryTreeResponse"] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CategoryListResponse(BaseModel):
@@ -187,8 +184,7 @@ class EquipmentBrief(BaseModel):
     review_count: int
     image_url: Optional[str]  # 首图
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EquipmentResponse(BaseModel):
@@ -227,8 +223,7 @@ class EquipmentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EquipmentListResponse(BaseModel):
@@ -339,8 +334,7 @@ class UserProfileResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 评价 Schema ==========
@@ -405,8 +399,7 @@ class ReviewResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReviewListResponse(BaseModel):

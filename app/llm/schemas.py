@@ -5,7 +5,7 @@ LLM 模块 Pydantic Schema
 
 from datetime import datetime
 from typing import Optional, List, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ========== 聊天相关 Schema ==========
@@ -56,8 +56,7 @@ class ConversationResponse(BaseModel):
     updated_at: datetime
     message_count: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ConversationListResponse(BaseModel):
@@ -74,8 +73,7 @@ class MessageResponse(BaseModel):
     tokens_used: Optional[int]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ConversationDetailResponse(BaseModel):
@@ -87,8 +85,7 @@ class ConversationDetailResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ========== 文档管理 Schema ==========
@@ -109,8 +106,7 @@ class DocumentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DocumentListResponse(BaseModel):

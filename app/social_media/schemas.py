@@ -5,7 +5,7 @@
 
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # ========== 枚举类型 ==========
@@ -61,8 +61,7 @@ class PlatformConfigResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PlatformConfigListResponse(BaseModel):
@@ -94,8 +93,7 @@ class ScrapeTaskResponse(BaseModel):
     error_message: Optional[str]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ScrapeTaskListResponse(BaseModel):
@@ -142,8 +140,7 @@ class ContentBrief(BaseModel):
     reply_count: int  # 回复建议数量
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ContentResponse(BaseModel):
@@ -177,8 +174,7 @@ class ContentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ContentListResponse(BaseModel):
@@ -288,8 +284,7 @@ class ReplySuggestionResponse(BaseModel):
     edited_content: Optional[str]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReplySuggestionListResponse(BaseModel):
@@ -331,8 +326,7 @@ class TagResponse(BaseModel):
     usage_count: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TagListResponse(BaseModel):
