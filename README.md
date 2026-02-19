@@ -255,6 +255,8 @@ With Docker deployment, Prometheus and Grafana are included:
 
 | Document | Description |
 |----------|-------------|
+| [Phase 1: Infrastructure](documents/phase1_infrastructure_guide.md) | FastAPI app, config, database, GPU, logging, health, metrics |
+| [Phase 2: LLM / RAG](documents/phase2_llm_rag_guide.md) | OpenAI chat, RAG pipeline, FAISS vector store, conversations |
 | [Phase 3: Ball Tracking](documents/phase3_ball_tracking_guide.md) | BlurBall + TT3D integration guide |
 | [Phase 4: Equipment](documents/phase4_equipment_recommendation.md) | Recommendation system design |
 | [Phase 5: Social Media](documents/phase5_social_media.md) | Scraping and RAG pipeline |
