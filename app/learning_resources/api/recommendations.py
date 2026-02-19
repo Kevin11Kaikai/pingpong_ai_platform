@@ -4,18 +4,16 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from loguru import logger
 
 from app.shared.database import get_db_session
 from app.learning_resources.core import (
     get_recommendation_engine,
     get_profile_service,
-    get_resource_service,
 )
 from app.learning_resources.models import DifficultyLevel, ResourceCategory, ResourceType
 from app.learning_resources.schemas import (
     RecommendationRequest, RecommendationResponse,
-    QuickRecommendationRequest, ResourceBrief,
+    ResourceBrief,
 )
 
 router = APIRouter()
@@ -253,7 +251,7 @@ async def get_featured_resources(
         select(LearningResource)
         .where(
             LearningResource.status == ResourceStatus.PUBLISHED,
-            LearningResource.is_featured == True,
+            LearningResource.is_featured,
         )
         .order_by(desc(LearningResource.created_at))
         .limit(limit)

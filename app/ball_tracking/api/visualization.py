@@ -4,9 +4,7 @@
 
 import os
 import uuid
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -78,7 +76,7 @@ async def generate_visualization_task(
 
             logger.info(f"可视化生成完成: {viz_id}")
 
-        except Exception as e:
+        except Exception:
             logger.exception(f"生成可视化失败: {viz_id}")
             # 删除失败的记录
             result = await db.execute(

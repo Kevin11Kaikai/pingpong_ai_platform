@@ -3,7 +3,6 @@ Ball Tracking 模块数据库模型
 """
 
 from datetime import datetime
-from typing import Optional
 from sqlalchemy import Column, String, Text, DateTime, Float, Integer, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 

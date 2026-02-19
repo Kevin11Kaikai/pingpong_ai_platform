@@ -265,7 +265,7 @@ class ScraperService:
         # 获取配置
         config = await self._get_config_by_id(db, task.platform_config_id)
         if not config:
-            raise ValueError(f"平台配置不存在")
+            raise ValueError("平台配置不存在")
 
         # 更新任务状态
         task.status = "running"

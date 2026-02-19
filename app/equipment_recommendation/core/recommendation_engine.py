@@ -10,7 +10,6 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from loguru import logger
 
 from app.equipment_recommendation.models import (
     Equipment, UserEquipmentProfile, EquipmentRecommendation,
@@ -19,7 +18,6 @@ from app.equipment_recommendation.models import (
 from app.equipment_recommendation.schemas import (
     RecommendationRequest, RecommendedItem, EquipmentBrief
 )
-from app.shared.embedding_service import EmbeddingService
 
 
 class RecommendationEngine:
@@ -167,7 +165,7 @@ class RecommendationEngine:
             .where(
                 Equipment.category_id == ref_equipment.category_id,
                 Equipment.id != equipment_id,
-                Equipment.is_active == True,
+                Equipment.is_active,
                 Equipment.embedding.isnot(None),
             )
         )
@@ -203,7 +201,7 @@ class RecommendationEngine:
         query = (
             select(Equipment)
             .options(selectinload(Equipment.brand), selectinload(Equipment.category))
-            .where(Equipment.is_active == True)
+            .where(Equipment.is_active)
         )
 
         # 根据推荐类型筛选分类

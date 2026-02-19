@@ -12,8 +12,7 @@ from sqlalchemy.orm import selectinload
 from loguru import logger
 
 from app.social_media.models import (
-    SocialContent, ContentTag, ContentTagMapping,
-    SocialPlatformConfig, Platform, ContentType, ContentStatus
+    SocialContent, SocialPlatformConfig, Platform, ContentType, ContentStatus
 )
 from app.social_media.schemas import (
     ContentCreate, ContentUpdate, ContentSearchRequest, SemanticSearchRequest

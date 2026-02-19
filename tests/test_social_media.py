@@ -4,7 +4,6 @@
 """
 
 import pytest
-from datetime import datetime
 from unittest.mock import patch, MagicMock, AsyncMock
 import numpy as np
 from pydantic import ValidationError
@@ -336,7 +335,6 @@ class TestScraperService:
 @pytest.fixture(scope="function")
 def db_session(event_loop):
     """创建测试数据库会话（同步 fixture）"""
-    import asyncio
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
     from app.shared.database import Base
 
@@ -558,7 +556,7 @@ def test_client():
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
 
-        asyncio.get_event_loop().run_until_complete(create_tables())
+        asyncio.run(create_tables())
 
         # 覆盖依赖 - 异步生成器
         async def override_get_db():
@@ -578,7 +576,7 @@ def test_client():
         app.dependency_overrides.clear()
 
         # 清理引擎
-        asyncio.get_event_loop().run_until_complete(engine.dispose())
+        asyncio.run(engine.dispose())
 
 
 class TestHealthAPI:

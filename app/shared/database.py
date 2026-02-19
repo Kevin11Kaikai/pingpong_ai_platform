@@ -85,20 +85,6 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 async def init_db() -> None:
     """初始化数据库表结构"""
     # 延迟导入避免循环依赖
-    from app.llm.models import Conversation, Message, Document
-    from app.ball_tracking.models import ProcessingJob, BallTrack2D, VisualizationOutput
-    from app.equipment_recommendation.models import (
-        EquipmentCategory, Brand, Equipment,
-        UserEquipmentProfile, EquipmentReview, EquipmentRecommendation
-    )
-    from app.social_media.models import (
-        SocialPlatformConfig, ScrapeTask, SocialContent,
-        ContentTag, ContentTagMapping, ReplySuggestion
-    )
-    from app.learning_resources.models import (
-        LearningResource, LearningPath, LearningPathItem,
-        UserProgress, ResourceBookmark
-    )
 
     engine = get_engine()
     async with engine.begin() as conn:

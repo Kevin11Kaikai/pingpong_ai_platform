@@ -6,8 +6,6 @@
 
 import pytest
 import uuid
-from datetime import datetime
-from unittest.mock import patch, MagicMock
 
 from fastapi.testclient import TestClient
 
@@ -18,7 +16,6 @@ class TestUserRegistrationFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -108,7 +105,6 @@ class TestEquipmentRecommendationFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -231,7 +227,6 @@ class TestVideoAnalysisFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -264,7 +259,6 @@ class TestLearningJourneyFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -323,7 +317,6 @@ class TestTrainingAnalysisFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -389,7 +382,6 @@ class TestSocialMediaFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -448,7 +440,6 @@ class TestLLMChatFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -501,7 +492,6 @@ class TestCompleteUserJourney:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 

@@ -5,7 +5,7 @@
 
 from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -172,7 +172,7 @@ class ProfileService:
             return enrollment  # 已报名，直接返回
 
         # 获取路径项目数
-        item_count = (await db.execute(
+        (await db.execute(
             select(func.count()).select_from(LearningPathItem)
             .where(LearningPathItem.path_id == path_id)
         )).scalar_one()
@@ -255,7 +255,6 @@ class ProfileService:
         # 计算完成数和当前项目索引
         completed_items = 0
         current_index = 0
-        total_study_minutes = 0
 
         for i, item in enumerate(items):
             prog = progress_map.get(item.resource_id)
@@ -359,14 +358,13 @@ class ProfileService:
             }
 
         # 按类型统计完成的资源
-        from app.learning_resources.models import ResourceType, ResourceCategory
         type_result = await db.execute(
             select(LearningResource.resource_type, func.count())
             .join(UserProgress, UserProgress.resource_id == LearningResource.id)
             .where(
                 and_(
                     UserProgress.user_id == user_id,
-                    UserProgress.is_completed == True,
+                    UserProgress.is_completed,
                 )
             )
             .group_by(LearningResource.resource_type)
@@ -383,7 +381,7 @@ class ProfileService:
             .where(
                 and_(
                     UserProgress.user_id == user_id,
-                    UserProgress.is_completed == True,
+                    UserProgress.is_completed,
                 )
             )
             .group_by(LearningResource.category)

@@ -13,7 +13,7 @@ from loguru import logger
 
 from app.learning_resources.models import (
     LearningPath, LearningPathItem, LearningResource,
-    DifficultyLevel, ResourceCategory, ResourceStatus,
+    DifficultyLevel, ResourceCategory,
 )
 from app.learning_resources.schemas import (
     LearningPathCreate, LearningPathUpdate, LearningPathItemCreate,

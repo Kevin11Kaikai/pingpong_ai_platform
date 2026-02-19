@@ -10,7 +10,6 @@ import cv2
 from loguru import logger
 
 from app.ball_tracking.core.tracker import BallTrack
-from app.ball_tracking.core.trajectory_analyzer import AnalysisResult
 from app.ball_tracking.core.video_processor import VideoProcessor, save_video
 
 
@@ -97,7 +96,7 @@ class TrajectoryVisualizer:
 
             # 根据时间计算透明度
             age = current_frame_idx - p2.frame_idx
-            alpha = max(0.2, 1.0 - age / self.trail_length)
+            max(0.2, 1.0 - age / self.trail_length)
 
             # 绘制线段
             pt1 = (int(p1.x), int(p1.y))

@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from loguru import logger
 
 from app.equipment_recommendation.models import (
-    EquipmentReview, Equipment, UserEquipmentProfile
+    EquipmentReview, Equipment
 )
 from app.equipment_recommendation.schemas import (
     ReviewCreate, ReviewUpdate
@@ -82,7 +82,7 @@ class ReviewService:
             .options(selectinload(EquipmentReview.user_profile))
             .where(
                 EquipmentReview.equipment_id == equipment_id,
-                EquipmentReview.is_active == True,
+                EquipmentReview.is_active,
             )
         )
 
@@ -96,7 +96,7 @@ class ReviewService:
         # 计数
         count_query = select(func.count(EquipmentReview.id)).where(
             EquipmentReview.equipment_id == equipment_id,
-            EquipmentReview.is_active == True,
+            EquipmentReview.is_active,
         )
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
@@ -123,7 +123,7 @@ class ReviewService:
             .options(selectinload(EquipmentReview.equipment))
             .where(
                 EquipmentReview.user_profile_id == user_profile_id,
-                EquipmentReview.is_active == True,
+                EquipmentReview.is_active,
             )
             .order_by(EquipmentReview.created_at.desc())
         )
@@ -131,7 +131,7 @@ class ReviewService:
         # 计数
         count_query = select(func.count(EquipmentReview.id)).where(
             EquipmentReview.user_profile_id == user_profile_id,
-            EquipmentReview.is_active == True,
+            EquipmentReview.is_active,
         )
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
@@ -209,7 +209,7 @@ class ReviewService:
                 func.avg(EquipmentReview.value_rating).label("avg_value"),
             ).where(
                 EquipmentReview.equipment_id == equipment_id,
-                EquipmentReview.is_active == True,
+                EquipmentReview.is_active,
             )
         )
         row = result.one()
@@ -222,7 +222,7 @@ class ReviewService:
             )
             .where(
                 EquipmentReview.equipment_id == equipment_id,
-                EquipmentReview.is_active == True,
+                EquipmentReview.is_active,
             )
             .group_by(EquipmentReview.overall_rating)
         )
@@ -256,7 +256,7 @@ class ReviewService:
                 func.avg(EquipmentReview.overall_rating).label("avg"),
             ).where(
                 EquipmentReview.equipment_id == equipment_id,
-                EquipmentReview.is_active == True,
+                EquipmentReview.is_active,
             )
         )
         row = result.one()

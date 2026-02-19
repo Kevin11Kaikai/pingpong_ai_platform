@@ -3,7 +3,7 @@
 结合检测结果进行时序关联和轨迹插值
 """
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass, field
 import uuid
 import numpy as np
@@ -106,7 +106,6 @@ class BallTracker:
 
         tracks: List[BallTrack] = []
         current_track: Optional[BallTrack] = None
-        last_valid_idx: int = -1
         gap_count: int = 0
 
         for i, det in enumerate(detections):
@@ -141,7 +140,6 @@ class BallTracker:
                         )
                     ],
                 )
-                last_valid_idx = i
                 gap_count = 0
             else:
                 # 检查是否属于当前轨迹
@@ -184,7 +182,6 @@ class BallTracker:
                             interpolated=False,
                         )
                     )
-                    last_valid_idx = i
                     gap_count = 0
                 else:
                     # 距离太远，结束当前轨迹，开始新轨迹
@@ -206,7 +203,6 @@ class BallTracker:
                             )
                         ],
                     )
-                    last_valid_idx = i
                     gap_count = 0
 
         # 处理最后一个轨迹

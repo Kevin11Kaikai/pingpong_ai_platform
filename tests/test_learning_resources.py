@@ -6,7 +6,7 @@
 
 import pytest
 from datetime import datetime
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import numpy as np
 from pydantic import ValidationError
 
@@ -320,7 +320,6 @@ def event_loop():
 @pytest.fixture(scope="function")
 def db_session(event_loop):
     """创建测试数据库会话（内存 SQLite）"""
-    import asyncio
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
     from sqlalchemy.pool import StaticPool
     from app.shared.database import Base
@@ -502,7 +501,6 @@ def test_client():
     from sqlalchemy.pool import StaticPool
     from app.shared.database import Base, get_db_session
     from app.main import app as fastapi_app  # 重命名避免与 app 模块冲突
-    import app.learning_resources.models  # noqa: F401（确保表注册）
 
     with patch("app.learning_resources.core.resource_service.EmbeddingService") as mock_embed:
         mock_embed.encode_single.return_value = np.random.rand(384).astype(np.float32)
@@ -1229,10 +1227,7 @@ class TestNewImports:
             KnowledgePoint,
             KnowledgeRelation,
             UserLearningProfile,
-            UserPathEnrollment,
             VideoAnalysisLink,
-            TechniqueCategory,
-            LearningStatus,
         )
         assert KnowledgePoint is not None
         assert KnowledgeRelation is not None
@@ -1243,14 +1238,8 @@ class TestNewImports:
         """测试新 Schema 导入"""
         from app.learning_resources.schemas import (
             KnowledgePointCreate,
-            KnowledgePointResponse,
             KnowledgeGraphResponse,
-            UserLearningProfileCreate,
-            UserLearningProfileResponse,
-            RecommendationRequest,
             RecommendationResponse,
-            VideoAnalysisLinkCreate,
-            TechniqueAnalysisRequest,
         )
         assert KnowledgePointCreate is not None
         assert KnowledgeGraphResponse is not None
@@ -1260,13 +1249,9 @@ class TestNewImports:
         """测试新服务导入"""
         from app.learning_resources.core import (
             KnowledgeService,
-            get_knowledge_service,
             ProfileService,
-            get_profile_service,
             LearningRecommendationEngine,
-            get_recommendation_engine,
             VideoAnalysisService,
-            get_video_analysis_service,
         )
         assert KnowledgeService is not None
         assert ProfileService is not None

@@ -5,7 +5,6 @@
 
 from typing import List, Optional, Tuple
 import uuid
-import math
 import numpy as np
 from datetime import datetime
 from sqlalchemy import select, func, or_, and_, desc, asc

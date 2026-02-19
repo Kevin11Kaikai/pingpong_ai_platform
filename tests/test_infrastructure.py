@@ -4,7 +4,7 @@
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import numpy as np
 
 
@@ -149,8 +149,7 @@ class TestDatabase:
     def test_database_import(self):
         """测试数据库模块导入"""
         from app.shared.database import (
-            Base, get_engine, get_session_factory,
-            get_db_session, init_db, close_db
+            Base, get_engine, get_session_factory
         )
         assert Base is not None
         assert get_engine is not None

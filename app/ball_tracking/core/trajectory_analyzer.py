@@ -3,12 +3,12 @@
 分析球的速度、落点等物理属性
 """
 
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass
 import numpy as np
 from loguru import logger
 
-from app.ball_tracking.core.tracker import BallTrack, TrackPoint
+from app.ball_tracking.core.tracker import BallTrack
 
 
 @dataclass

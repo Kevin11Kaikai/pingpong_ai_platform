@@ -5,12 +5,11 @@ BlurBall 检测器封装
 
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Dict
 from dataclasses import dataclass
 import numpy as np
 import torch
 import torchvision.transforms as T
-import cv2
 from loguru import logger
 from omegaconf import OmegaConf, DictConfig
 

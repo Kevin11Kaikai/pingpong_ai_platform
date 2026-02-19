@@ -5,8 +5,6 @@ LLM 模块测试 (Phase 2)
 
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
-from typing import List
-import numpy as np
 import tempfile
 from pathlib import Path
 

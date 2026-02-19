@@ -1,0 +1,152 @@
+# =============================================================================
+# Pingpong AI Platform - Production Docker Compose
+# Architecture: nginx -> pingpong-api <- prometheus <- grafana
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # Nginx Reverse Proxy
+  # ===========================================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: pingpong-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      pingpong-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - pingpong-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================================================
+  # Pingpong API Service
+  # ===========================================================================
+  pingpong-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    image: pingpong-api:latest
+    container_name: pingpong-api
+    expose:
+      - "8000"
+    volumes:
+      # Data persistence
+      - pingpong-data:/app/data
+      - pingpong-logs:/app/logs
+      - pingpong-vectorstore:/app/app/vectorstore
+      # Model checkpoints (read-only)
+      - ../external:/app/external:ro
+    env_file:
+      - ../.env.production
+    environment:
+      - APP_ENV=production
+      - PROMETHEUS_ENABLED=true
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - pingpong-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # ===========================================================================
+  # Prometheus Monitoring
+  # ===========================================================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: pingpong-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    depends_on:
+      pingpong-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - pingpong-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================================================
+  # Grafana Dashboard
+  # ===========================================================================
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: pingpong-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - pingpong-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  pingpong-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  pingpong-data:
+    driver: local
+  pingpong-logs:
+    driver: local
+  pingpong-vectorstore:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  nginx-logs:
+    driver: local

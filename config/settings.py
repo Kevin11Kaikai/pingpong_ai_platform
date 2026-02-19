@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -85,6 +84,16 @@ class Settings(BaseSettings):
 
     # Training Analysis - Metrics Calculation
     training_metrics_speed_conversion_factor: float = 3.6  # m/s to km/h
+
+    # Prometheus Monitoring
+    prometheus_enabled: bool = False
+    prometheus_port: int = 8001
+
+    # CORS Configuration
+    cors_origins: list[str] = ["*"]
+
+    # Server Configuration
+    server_workers: int = 1
 
     model_config = SettingsConfigDict(
         env_file=".env",

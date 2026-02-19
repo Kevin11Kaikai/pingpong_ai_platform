@@ -6,7 +6,7 @@
 from typing import List, Optional, Dict, Any, Tuple
 import uuid
 from datetime import datetime
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from loguru import logger
@@ -311,7 +311,7 @@ class KnowledgeService:
             await self._expand_graph(db, center_point_id, depth, visited_ids, nodes, edges)
         else:
             # 获取所有节点
-            conditions = [KnowledgePoint.is_active == True]
+            conditions = [KnowledgePoint.is_active]
             if category:
                 conditions.append(KnowledgePoint.category == category)
 
@@ -498,7 +498,7 @@ class KnowledgeService:
         result = await db.execute(
             select(KnowledgePoint).where(
                 and_(
-                    KnowledgePoint.is_active == True,
+                    KnowledgePoint.is_active,
                     KnowledgePoint.embedding.isnot(None),
                 )
             )

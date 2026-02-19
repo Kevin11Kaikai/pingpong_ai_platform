@@ -1,0 +1,92 @@
+# =============================================================================
+# Pingpong AI Platform - Production Dockerfile
+# Multi-stage build for optimized image size and security
+# =============================================================================
+
+# Stage 1: Builder - Install dependencies
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS builder
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# 安装 Python 3.11 和构建依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
+    python3-pip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# 创建虚拟环境
+RUN python3.11 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# 安装 Python 依赖
+WORKDIR /build
+COPY requirements.txt requirements-gpu.txt ./
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt && \
+    pip install -r requirements-gpu.txt && \
+    pip install prometheus-client>=0.19.0
+
+# =============================================================================
+# Stage 2: Runtime - Minimal production image
+# =============================================================================
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04 AS runtime
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    APP_ENV=production
+
+# 安装运行时依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# 创建非 root 用户
+RUN groupadd -r pingpong && useradd -r -g pingpong pingpong
+
+# 复制虚拟环境
+COPY --from=builder /opt/venv /opt/venv
+
+# 设置工作目录
+WORKDIR /app
+
+# 创建必要目录
+RUN mkdir -p /app/data /app/logs /app/app/vectorstore && \
+    chown -R pingpong:pingpong /app
+
+# 复制应用代码
+COPY --chown=pingpong:pingpong app/ ./app/
+COPY --chown=pingpong:pingpong config/ ./config/
+COPY --chown=pingpong:pingpong external/ ./external/
+
+# 切换到非 root 用户
+USER pingpong
+
+# 暴露端口
+EXPOSE 8000
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health/ || exit 1
+
+# 启动命令 (2 workers for production)
+CMD ["python3", "-m", "uvicorn", "app.main:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8000", \
+     "--workers", "2", \
+     "--proxy-headers", \
+     "--forwarded-allow-ips", "*"]

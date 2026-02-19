@@ -5,7 +5,6 @@
 
 from typing import Optional, List
 from dataclasses import dataclass
-from pathlib import Path
 import uuid
 import time
 from loguru import logger
@@ -156,7 +155,7 @@ class BallTrackingPipeline:
                 await progress_callback("analyzing", 85)
 
             analysis_results = self._run_analysis(tracks)
-            logger.info(f"分析完成")
+            logger.info("分析完成")
 
         # 清理
         video_processor.close()

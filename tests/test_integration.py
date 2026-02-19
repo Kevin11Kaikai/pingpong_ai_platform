@@ -6,8 +6,6 @@
 
 import pytest
 import uuid
-from datetime import datetime
-from unittest.mock import patch, MagicMock, AsyncMock
 
 from fastapi.testclient import TestClient
 
@@ -18,7 +16,6 @@ class TestLLMAndLearningResources:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -84,7 +81,6 @@ class TestTrainingAndEquipment:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -173,7 +169,6 @@ class TestVideoAnalysisAndTraining:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -210,7 +205,6 @@ class TestSocialMediaAndLLM:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -252,7 +246,6 @@ class TestCrossModuleDataFlow:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -343,7 +336,6 @@ class TestAPIVersionConsistency:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 

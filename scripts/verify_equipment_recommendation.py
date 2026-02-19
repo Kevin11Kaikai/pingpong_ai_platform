@@ -15,9 +15,7 @@ Features:
 import asyncio
 import sys
 import os
-import uuid
 import argparse
-from typing import Optional
 
 # Set stdout encoding to utf-8 for Windows
 if sys.platform == 'win32':
@@ -70,7 +68,7 @@ async def run_verification(verbose: bool = False):
     from app.shared.database import init_db, get_session_factory, close_db
     from app.equipment_recommendation.models import (
         EquipmentCategory, Brand, Equipment, UserEquipmentProfile,
-        EquipmentReview, PlayingStyle, GripStyle, SkillLevel
+        PlayingStyle
     )
     from app.equipment_recommendation.core import (
         get_equipment_service, get_profile_service,
@@ -78,7 +76,7 @@ async def run_verification(verbose: bool = False):
     )
     from app.equipment_recommendation.schemas import (
         BrandCreate, CategoryCreate, EquipmentCreate, EquipmentSearchRequest,
-        UserProfileCreate, UserProfileUpdate, RecommendationRequest, ReviewCreate
+        UserProfileCreate, RecommendationRequest, ReviewCreate
     )
     from sqlalchemy import select, func
 
@@ -137,7 +135,7 @@ async def run_verification(verbose: bool = False):
                             )
                             if verbose:
                                 print_info(f"创建品牌: {brand.name}")
-                    except Exception as e:
+                    except Exception:
                         if verbose:
                             print_warning(f"品牌已存在或创建失败: {brand_data['name']}")
 
@@ -166,7 +164,7 @@ async def run_verification(verbose: bool = False):
                         )
                         if verbose:
                             print_info(f"创建分类: {cat.display_name}")
-                except Exception as e:
+                except Exception:
                     if verbose:
                         print_warning(f"分类已存在或创建失败: {cat_data['name']}")
 
@@ -490,7 +488,7 @@ async def run_verification(verbose: bool = False):
                 for eq in eq_list:
                     print(f"      - {eq.name}: 速度{eq.speed_rating} / 旋转{eq.spin_rating} / 控制{eq.control_rating}")
 
-                print_info(f"对比摘要:")
+                print_info("对比摘要:")
                 print(f"      速度最高: {summary.get('best_for_speed', 'N/A')[:8]}...")
                 print(f"      旋转最高: {summary.get('best_for_spin', 'N/A')[:8]}...")
                 print(f"      控制最高: {summary.get('best_for_control', 'N/A')[:8]}...")

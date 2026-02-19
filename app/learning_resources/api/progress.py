@@ -2,7 +2,6 @@
 用户学习进度 REST API 路由
 """
 
-from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 

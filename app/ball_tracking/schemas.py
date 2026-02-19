@@ -4,7 +4,7 @@ Ball Tracking 模块 Pydantic Schema
 """
 
 from datetime import datetime
-from typing import Optional, List, Tuple, Literal
+from typing import Optional, List, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 

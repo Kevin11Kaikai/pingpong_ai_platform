@@ -3,24 +3,20 @@
 基于用户档案、学习历史和知识图谱进行个性化推荐
 """
 
-from typing import List, Tuple, Optional, Dict, Any
-import numpy as np
+from typing import List, Tuple, Optional
 from datetime import datetime
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from loguru import logger
 
 from app.learning_resources.models import (
     LearningResource, LearningPath, UserLearningProfile,
-    UserProgress, UserPathEnrollment, KnowledgePoint,
-    DifficultyLevel, ResourceType, ResourceCategory, ResourceStatus,
+    UserProgress, UserPathEnrollment, ResourceStatus,
 )
 from app.learning_resources.schemas import (
-    RecommendationRequest, RecommendedResource, RecommendedPath,
+    RecommendedResource, RecommendedPath,
     ResourceBrief, LearningPathBrief,
 )
-from app.shared.embedding_service import EmbeddingService
 
 
 class LearningRecommendationEngine:
@@ -70,7 +66,7 @@ class LearningRecommendationEngine:
                 select(UserProgress.resource_id).where(
                     and_(
                         UserProgress.user_id == profile.user_id,
-                        UserProgress.is_completed == True,
+                        UserProgress.is_completed,
                     )
                 )
             )
@@ -130,7 +126,7 @@ class LearningRecommendationEngine:
         enrolled_ids = {row[0] for row in enrolled_result.all()}
 
         # 获取候选路径
-        conditions = [LearningPath.is_published == True]
+        conditions = [LearningPath.is_published]
         if enrolled_ids:
             conditions.append(LearningPath.id.notin_(enrolled_ids))
 
@@ -183,7 +179,7 @@ class LearningRecommendationEngine:
             .where(
                 and_(
                     UserProgress.user_id == profile.user_id,
-                    UserProgress.is_completed == False,
+                    not UserProgress.is_completed,
                     UserProgress.progress_percent > 0,
                 )
             )

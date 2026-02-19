@@ -6,8 +6,7 @@
 
 import pytest
 import uuid
-from datetime import datetime
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 from pydantic import ValidationError
 
 from fastapi.testclient import TestClient
@@ -830,7 +829,6 @@ class TestBrandAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -861,7 +859,6 @@ class TestCategoryAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -891,7 +888,6 @@ class TestEquipmentAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -947,7 +943,6 @@ class TestProfileAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -977,7 +972,6 @@ class TestReviewAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -1005,7 +999,6 @@ class TestRecommendationAPI:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 
@@ -1063,7 +1056,6 @@ class TestHealthCheck:
 
     @pytest.fixture
     def client(self):
-        from fastapi.testclient import TestClient
         from app.main import app
         return TestClient(app, raise_server_exceptions=False)
 

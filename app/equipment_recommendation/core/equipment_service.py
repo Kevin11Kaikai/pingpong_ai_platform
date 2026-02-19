@@ -5,7 +5,7 @@
 
 import uuid
 from typing import Optional, List, Tuple
-from sqlalchemy import select, func, or_, and_
+from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from loguru import logger
@@ -60,7 +60,7 @@ class EquipmentService:
         """获取品牌列表"""
         query = select(Brand)
         if not include_inactive:
-            query = query.where(Brand.is_active == True)
+            query = query.where(Brand.is_active)
         query = query.order_by(Brand.name)
 
         result = await db.execute(query)
@@ -69,7 +69,7 @@ class EquipmentService:
         # 计数
         count_query = select(func.count(Brand.id))
         if not include_inactive:
-            count_query = count_query.where(Brand.is_active == True)
+            count_query = count_query.where(Brand.is_active)
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
 
@@ -251,7 +251,7 @@ class EquipmentService:
         query = (
             select(Equipment)
             .options(selectinload(Equipment.brand), selectinload(Equipment.category))
-            .where(Equipment.is_active == True)
+            .where(Equipment.is_active)
         )
 
         # 关键词搜索

@@ -11,7 +11,7 @@ from app.social_media.schemas import (
     ContentCreate, ContentUpdate, ContentResponse, ContentBrief,
     ContentListResponse, ContentSearchRequest,
     SemanticSearchRequest, SemanticSearchResponse, SemanticSearchResult,
-    OverallStatsResponse, PlatformStatsResponse,
+    OverallStatsResponse,
 )
 
 router = APIRouter()

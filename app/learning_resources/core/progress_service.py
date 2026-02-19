@@ -3,7 +3,7 @@
 提供进度记录的 CRUD 和统计功能
 """
 
-from typing import List, Optional
+from typing import Optional
 import uuid
 from datetime import datetime
 from sqlalchemy import select, func, and_
