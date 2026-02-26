@@ -13,16 +13,25 @@ const CanvasUtils = {
     const ctx = canvas.getContext('2d');
     let animationId = null;
     let tracks = [];
+    let segments = [];       // Track2DResponse 结构化段信息，含速度
+    let hoveredSegment = null;
     let currentFrame = 0;
     let fps = 30;
     let isPlaying = false;
 
-    // 调整 Canvas 大小
+    // 调整 Canvas 大小 —— 以视频原生分辨率为坐标系，CSS 负责缩放到显示尺寸
     const resize = () => {
-      canvas.width = video.videoWidth || video.clientWidth;
-      canvas.height = video.videoHeight || video.clientHeight;
+      if (video.videoWidth) {
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+      } else {
+        canvas.width  = video.clientWidth  || 640;
+        canvas.height = video.clientHeight || 360;
+      }
     };
 
+    // 若 loadedmetadata 已触发（如重新加载历史任务），立即同步一次
+    resize();
     video.addEventListener('loadedmetadata', resize);
     window.addEventListener('resize', resize);
 
@@ -35,17 +44,207 @@ const CanvasUtils = {
 
     video.addEventListener('timeupdate', updateFrame);
 
+    // ── 鼠标悬停：在 canvas 父容器上监听（canvas 自身 pointer-events: none）──
+    const container = canvas.parentElement;
+
+    const handleMouseMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width) return;
+      const scaleX = canvas.width  / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top)  * scaleY;
+      const threshold = 20;           // 命中半径（canvas 原生像素）
+      hoveredSegment = null;
+      outer: for (const seg of segments) {
+        for (const pt of seg.points) {
+          if (Math.hypot(pt.x - mx, pt.y - my) < threshold) {
+            hoveredSegment = seg;
+            break outer;
+          }
+        }
+      }
+    };
+
+    const handleMouseLeave = () => { hoveredSegment = null; };
+
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    // ── 内部绘制辅助函数 ──
+
+    // 圆角矩形（兼容不支持 ctx.roundRect 的浏览器）
+    const fillRoundRect = (x, y, w, h, r) => {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    // 速度标签（在当前活跃轨迹段的起点渲染）
+    const drawSpeedLabel = (seg) => {
+      if (!seg.points.length) return;
+      ctx.save();                           // 隔离 ctx 状态，防止污染后续绘制
+      const pt = seg.points[0];
+      const speed = seg.maxSpeedKmh != null ? seg.maxSpeedKmh.toFixed(1) : '?';
+      const label = `#${seg.index} ${speed} km/h`;
+      const textColor = seg.isFastest ? '#fa8c16' : '#ffffff';
+      const pad = 4;
+      ctx.font = 'bold 12px sans-serif';
+      const tw = ctx.measureText(label).width;
+      const bw = tw + pad * 2;
+      const bh = 18;
+      // 标签位置：起点右上方，超出画布边界时自动靠内
+      let lx = pt.x + 6;
+      let ly = pt.y - bh - 6;
+      lx = Math.min(Math.max(lx, 2), canvas.width  - bw - 2);
+      ly = Math.max(ly, 2);
+      // 背景（仅填充一次）
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      fillRoundRect(lx, ly, bw, bh, 3);
+      // 文字
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, lx + pad, ly + bh / 2);
+      // 最高速：只描橙色边框，不重复 fill
+      if (seg.isFastest) {
+        ctx.strokeStyle = '#fa8c16';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(lx + 3, ly);
+        ctx.lineTo(lx + bw - 3, ly);
+        ctx.quadraticCurveTo(lx + bw, ly, lx + bw, ly + 3);
+        ctx.lineTo(lx + bw, ly + bh - 3);
+        ctx.quadraticCurveTo(lx + bw, ly + bh, lx + bw - 3, ly + bh);
+        ctx.lineTo(lx + 3, ly + bh);
+        ctx.quadraticCurveTo(lx, ly + bh, lx, ly + bh - 3);
+        ctx.lineTo(lx, ly + 3);
+        ctx.quadraticCurveTo(lx, ly, lx + 3, ly);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+
+    // 悬停详情框
+    const drawHoverTooltip = (seg) => {
+      const lines = [
+        `轨迹 #${seg.index}`,
+        `帧范围: ${seg.startFrame} – ${seg.endFrame}`,
+        `检测点: ${seg.pointCount} 个`,
+        seg.maxSpeedKmh != null ? `最高速: ${seg.maxSpeedKmh.toFixed(1)} km/h` : null,
+        seg.avgSpeedKmh != null ? `平均速: ${seg.avgSpeedKmh.toFixed(1)} km/h` : null,
+        seg.durationMs   ? `时长: ${(seg.durationMs / 1000).toFixed(2)} s`   : null,
+      ].filter(Boolean);
+
+      const pad  = 8;
+      const lineH = 17;
+      ctx.font = '12px sans-serif';
+      const maxTw = Math.max(...lines.map(l => ctx.measureText(l).width));
+      const bw = maxTw + pad * 2;
+      const bh = lines.length * lineH + pad * 2;
+
+      const fp = seg.points[0];
+      let tx = (fp ? fp.x : 0) + 18;
+      let ty = (fp ? fp.y : 0) - bh / 2;
+      tx = Math.min(Math.max(tx, 4), canvas.width  - bw - 4);
+      ty = Math.min(Math.max(ty, 4), canvas.height - bh - 4);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.82)';
+      fillRoundRect(tx, ty, bw, bh, 5);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      lines.forEach((line, i) => {
+        ctx.font = i === 0 ? 'bold 13px sans-serif' : '12px sans-serif';
+        ctx.fillStyle = i === 0
+          ? (seg.isFastest ? '#fa8c16' : '#faad14')
+          : '#ffffff';
+        ctx.fillText(line, tx + pad, ty + pad + i * lineH);
+      });
+    };
+
     return {
       ctx,
 
       /**
        * 设置轨迹数据
+       * 接受两种格式：
+       *   - Track2DResponse[]  ← 后端 /jobs/{id}/tracks 返回格式
+       *   - 扁平 point[]       ← 旧格式（向后兼容）
        * @param {Array} trackData - 轨迹数据
        * @param {number} videoFps - 视频帧率
        */
       setTracks(trackData, videoFps = 30) {
-        tracks = trackData;
         fps = videoFps;
+        tracks = [];
+        segments = [];
+        hoveredSegment = null;
+
+        (trackData || []).forEach((item, idx) => {
+          if (Array.isArray(item.points)) {
+            // Track2DResponse 结构
+            const pts = item.points.map(p => ({ frame: p.frame_idx, x: p.x, y: p.y }));
+            pts.forEach(p => tracks.push(p));
+            segments.push({
+              index:      idx + 1,
+              trackId:    item.track_id || item.id || String(idx),
+              points:     pts,
+              startFrame: item.start_frame ?? (pts[0]?.frame ?? 0),
+              endFrame:   item.end_frame   ?? (pts[pts.length - 1]?.frame ?? 0),
+              pointCount: item.point_count ?? pts.length,
+              durationMs: item.duration_ms ?? 0,
+              maxSpeedKmh: null,   // 由 setAnalysis 填充
+              avgSpeedKmh: null,
+              isFastest:   false,
+            });
+          } else if (item.frame_idx !== undefined) {
+            tracks.push({ frame: item.frame_idx, x: item.x, y: item.y });
+          }
+        });
+
+        tracks.sort((a, b) => a.frame - b.frame);
+      },
+
+      /**
+       * 注入每段轨迹的速度分析数据（在 loadResults 拿到数据后调用）
+       * @param {Array} analysisData - TrajectoryAnalysisResponse[]
+       */
+      setAnalysis(analysisData) {
+        if (!analysisData || !segments.length) return;
+        // 按 track_id 建立索引
+        const byId = {};
+        for (const a of analysisData) {
+          if (a.track_id) byId[a.track_id] = a;
+        }
+        // 回填速度
+        for (const seg of segments) {
+          const a = byId[seg.trackId];
+          if (a?.speed_stats) {
+            seg.maxSpeedKmh = a.speed_stats.max_speed_kmh ?? null;
+            seg.avgSpeedKmh = a.speed_stats.avg_speed_kmh ?? null;
+          }
+        }
+        // 标记最高速轨迹（橙色高亮）
+        let maxKmh = 0, fastest = null;
+        for (const seg of segments) {
+          if (seg.maxSpeedKmh != null && seg.maxSpeedKmh > maxKmh) {
+            maxKmh = seg.maxSpeedKmh;
+            fastest = seg;
+          }
+        }
+        if (fastest) fastest.isFastest = true;
       },
 
       /**
@@ -63,52 +262,66 @@ const CanvasUtils = {
 
         if (!tracks || tracks.length === 0) return;
 
-        // 获取当前帧附近的轨迹点
-        const frameTrack = tracks.filter(t => {
-          return Math.abs(t.frame - currentFrame) <= 15;
+        // 取当前帧前后 15 帧的轨迹点作为拖尾
+        const trailPoints = tracks.filter(t => {
+          const diff = t.frame - currentFrame;
+          return diff >= -15 && diff <= 0;          // 显示当前帧及此前 15 帧
         });
 
-        if (frameTrack.length === 0) return;
+        if (trailPoints.length === 0) return;
 
-        // 绘制轨迹线
+        // 坐标已是视频原生像素，canvas 分辨率 = video.videoWidth × video.videoHeight
+        // CSS 负责将 canvas 缩放到显示尺寸，无需额外换算
+        const px = p => p.x;
+        const py = p => p.y;
+
+        // 绘制黄色轨迹拖尾
         ctx.beginPath();
-        ctx.strokeStyle = '#1890ff';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#faad14';
+        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        frameTrack.forEach((point, index) => {
-          const x = point.x * canvas.width;
-          const y = point.y * canvas.height;
-
+        trailPoints.forEach((point, index) => {
           if (index === 0) {
-            ctx.moveTo(x, y);
+            ctx.moveTo(px(point), py(point));
           } else {
-            ctx.lineTo(x, y);
+            ctx.lineTo(px(point), py(point));
           }
         });
 
         ctx.stroke();
 
-        // 绘制当前球位置
-        const currentPoint = tracks.find(t => t.frame === currentFrame);
-        if (currentPoint) {
-          const x = currentPoint.x * canvas.width;
-          const y = currentPoint.y * canvas.height;
+        // 绘制当前帧球位置（最近一个点）
+        const latestPoint = trailPoints[trailPoints.length - 1];
+        if (latestPoint) {
+          const x = px(latestPoint);
+          const y = py(latestPoint);
 
-          // 外圈
+          // 外圈（红色）
           ctx.beginPath();
           ctx.arc(x, y, 12, 0, Math.PI * 2);
           ctx.strokeStyle = '#ff4d4f';
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // 内圈
+          // 内圈（红色实心）
           ctx.beginPath();
           ctx.arc(x, y, 6, 0, Math.PI * 2);
           ctx.fillStyle = '#ff4d4f';
           ctx.fill();
         }
+
+        // ── 速度标签：只显示当前帧所属的轨迹段 ──
+        for (const seg of segments) {
+          if (seg.maxSpeedKmh != null &&
+              seg.startFrame <= currentFrame && currentFrame <= seg.endFrame) {
+            drawSpeedLabel(seg);
+          }
+        }
+
+        // ── 悬停详情框 ──
+        if (hoveredSegment) drawHoverTooltip(hoveredSegment);
       },
 
       /**
@@ -265,6 +478,10 @@ const CanvasUtils = {
         video.removeEventListener('loadedmetadata', resize);
         video.removeEventListener('timeupdate', updateFrame);
         window.removeEventListener('resize', resize);
+        if (container) {
+          container.removeEventListener('mousemove', handleMouseMove);
+          container.removeEventListener('mouseleave', handleMouseLeave);
+        }
       },
     };
   },
