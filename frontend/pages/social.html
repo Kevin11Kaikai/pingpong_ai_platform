@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社交媒体 - 乒乓 AI</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">社交媒体</h1>
+          <p class="page-subtitle">监控和分析乒乓球相关社交媒体内容</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="SocialPage.showTasks()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            抓取任务
+          </button>
+          <button class="btn btn-primary" onclick="SocialPage.showNewTaskModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            新建抓取
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="social-layout">
+          <!-- 内容列表 -->
+          <div>
+            <!-- 搜索和筛选 -->
+            <div class="card mb-md">
+              <div class="card-body">
+                <div class="flex gap-md items-end flex-wrap">
+                  <div class="flex-1" style="min-width: 200px;">
+                    <label class="form-label">搜索内容</label>
+                    <div class="search-input">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                      <input type="text" id="searchInput" class="form-input" placeholder="搜索关键词..." oninput="SocialPage.handleSearch()">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="form-label">平台</label>
+                    <select id="platformFilter" class="form-input form-select" onchange="SocialPage.handleFilterChange()">
+                      <option value="">全部平台</option>
+                      <option value="weibo">微博</option>
+                      <option value="zhihu">知乎</option>
+                      <option value="douyin">抖音</option>
+                      <option value="bilibili">B站</option>
+                      <option value="xiaohongshu">小红书</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">类型</label>
+                    <select id="typeFilter" class="form-input form-select" onchange="SocialPage.handleFilterChange()">
+                      <option value="">全部类型</option>
+                      <option value="question">问答</option>
+                      <option value="post">帖子</option>
+                      <option value="comment">评论</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-secondary" onclick="SocialPage.clearFilters()">重置</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 内容列表 -->
+            <div id="contentList">
+              <!-- 由 JS 填充 -->
+            </div>
+
+            <div id="pagination" class="mt-lg"></div>
+          </div>
+
+          <!-- 回复面板 -->
+          <aside class="reply-panel">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">AI 回复助手</h3>
+              </div>
+              <div class="card-body">
+                <div id="selectedContent">
+                  <div class="text-sm text-secondary">选择左侧内容以生成回复建议</div>
+                </div>
+
+                <div id="replySection" style="display: none;">
+                  <div class="form-group mt-md">
+                    <label class="form-label">回复语气</label>
+                    <select id="replyTone" class="form-input form-select">
+                      <option value="professional">专业</option>
+                      <option value="friendly">友好</option>
+                      <option value="humorous">幽默</option>
+                      <option value="formal">正式</option>
+                    </select>
+                  </div>
+
+                  <button class="btn btn-primary btn-block mb-md" onclick="SocialPage.generateReply()">
+                    生成回复建议
+                  </button>
+
+                  <div class="generated-reply" id="generatedReply" style="display: none;">
+                    <h5 class="text-sm font-medium mb-sm">生成的回复</h5>
+                    <div id="replyContent" class="text-sm"></div>
+                    <div class="flex gap-sm mt-md">
+                      <button class="btn btn-sm btn-secondary" onclick="SocialPage.copyReply()">复制</button>
+                      <button class="btn btn-sm btn-ghost" onclick="SocialPage.regenerateReply()">重新生成</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分析结果 -->
+            <div class="card mt-md" id="analysisCard" style="display: none;">
+              <div class="card-header">
+                <h3 class="card-title">内容分析</h3>
+              </div>
+              <div class="card-body" id="analysisResult">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+
+            <!-- 统计 -->
+            <div class="card mt-md">
+              <div class="card-header">
+                <h3 class="card-title">今日统计</h3>
+              </div>
+              <div class="card-body" id="statsCard">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/social.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/modal.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/components/pagination.js"></script>
+  <script src="/static/js/pages/social.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

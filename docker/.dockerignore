@@ -1,0 +1,84 @@
+# =============================================================================
+# Docker Build Ignore File
+# =============================================================================
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.production
+!.env.example
+!.env.production.example
+
+# Test files
+tests/
+pytest.ini
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation (keep essential ones)
+documents/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Model weights (should be mounted as volumes)
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.bin
+checkpoints/
+
+# Data directories (should be mounted as volumes)
+data/
+logs/
+output/
+
+# External repositories (should be cloned separately)
+external/BlurBall/
+external/tt3d/
+
+# CI/CD
+.github/
+
+# Linting
+.ruff_cache/
+ruff.toml
+
+# Docker
+docker/
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+!docker/nginx/
+
+# Misc
+*.log
+*.tmp
+*.bak
+nul

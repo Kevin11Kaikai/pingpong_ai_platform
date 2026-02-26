@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>乒乓 AI - 智能乒乓球训练平台</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- 侧边栏由 JS 渲染 -->
+
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">系统概览</h1>
+          <p class="page-subtitle">快速入口</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="Dashboard.refresh()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            刷新
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- 统计概览 -->
+        <section class="mb-lg">
+          <h2 class="card-title mb-md">统计概览</h2>
+          <div class="dashboard-stats" id="statsGrid">
+            <!-- 由 JS 填充 -->
+          </div>
+        </section>
+
+        <!-- 模块状态 -->
+        <section class="mb-lg">
+          <h2 class="card-title mb-md">模块状态</h2>
+          <div class="module-status-grid" id="moduleStatusGrid">
+            <!-- 由 JS 填充 -->
+          </div>
+        </section>
+
+        <!-- 快速入口 -->
+        <section class="mb-lg">
+          <h2 class="card-title mb-md">快速入口</h2>
+          <div class="quick-actions" id="quickActions">
+            <a href="/chat" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              <span>AI 对话</span>
+            </a>
+            <a href="/video" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              <span>视频分析</span>
+            </a>
+            <a href="/equipment" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>装备推荐</span>
+            </a>
+            <a href="/learning" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+              </svg>
+              <span>学习资源</span>
+            </a>
+            <a href="/training" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+              <span>训练分析</span>
+            </a>
+            <a href="/social" class="quick-action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+              <span>社交媒体</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 最近活动 -->
+        <section>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">最近活动</h3>
+              <a href="#" class="text-primary text-sm">查看全部</a>
+            </div>
+            <div class="card-body" id="recentActivity">
+              <!-- 由 JS 填充 -->
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/llm.js"></script>
+  <script src="/static/js/api/ball-tracking.js"></script>
+  <script src="/static/js/api/equipment.js"></script>
+  <script src="/static/js/api/learning.js"></script>
+  <script src="/static/js/api/training.js"></script>
+  <script src="/static/js/api/social.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/pages/dashboard.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

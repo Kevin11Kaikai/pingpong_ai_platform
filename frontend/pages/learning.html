@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习资源 - 乒乓 AI</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/pages.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">学习资源</h1>
+          <p class="page-subtitle">系统化的乒乓球学习内容</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="LearningPage.showBookmarks()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+            </svg>
+            我的书签
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="learning-layout">
+          <!-- 主内容区 -->
+          <div>
+            <!-- 学习路径 -->
+            <section class="mb-lg">
+              <h2 class="card-title mb-md">学习路径</h2>
+              <div class="grid grid-cols-2 gap-md" id="pathsGrid">
+                <!-- 由 JS 填充 -->
+              </div>
+            </section>
+
+            <!-- 资源列表 -->
+            <section>
+              <div class="flex items-center justify-between mb-md">
+                <h2 class="card-title">学习资源</h2>
+                <div class="flex gap-sm">
+                  <div class="search-input">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="searchInput" class="form-input" placeholder="搜索资源..." style="width: 200px;" oninput="LearningPage.handleSearch()">
+                  </div>
+                  <select id="categoryFilter" class="form-input form-select" style="width: auto;" onchange="LearningPage.handleFilterChange()">
+                    <option value="">全部分类</option>
+                    <option value="basic">基础技术</option>
+                    <option value="advanced">进阶技术</option>
+                    <option value="tactics">战术训练</option>
+                    <option value="rules">规则裁判</option>
+                    <option value="fitness">体能训练</option>
+                  </select>
+                  <select id="difficultyFilter" class="form-input form-select" style="width: auto;" onchange="LearningPage.handleFilterChange()">
+                    <option value="">全部难度</option>
+                    <option value="beginner">入门</option>
+                    <option value="intermediate">进阶</option>
+                    <option value="advanced">高级</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="resourcesList">
+                <!-- 由 JS 填充 -->
+              </div>
+
+              <div id="pagination" class="mt-lg"></div>
+            </section>
+          </div>
+
+          <!-- 进度侧边栏 -->
+          <aside class="progress-sidebar">
+            <!-- 学习进度概览 -->
+            <div class="card progress-overview">
+              <h3 class="card-title mb-md">学习进度</h3>
+              <div class="progress-chart-container">
+                <canvas id="progressChart"></canvas>
+              </div>
+              <div class="grid grid-cols-3 gap-sm mt-md text-center">
+                <div>
+                  <div class="text-lg font-bold text-success" id="completedCount">0</div>
+                  <div class="text-xs text-secondary">已完成</div>
+                </div>
+                <div>
+                  <div class="text-lg font-bold text-warning" id="inProgressCount">0</div>
+                  <div class="text-xs text-secondary">进行中</div>
+                </div>
+                <div>
+                  <div class="text-lg font-bold text-tertiary" id="notStartedCount">0</div>
+                  <div class="text-xs text-secondary">未开始</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 推荐资源 -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">推荐学习</h3>
+              </div>
+              <div class="card-body" id="recommendedResources">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+
+            <!-- 最近学习 -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">最近学习</h3>
+              </div>
+              <div class="card-body" id="recentLearning">
+                <!-- 由 JS 填充 -->
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api/client.js"></script>
+  <script src="/static/js/api/learning.js"></script>
+  <script src="/static/js/utils/format.js"></script>
+  <script src="/static/js/utils/storage.js"></script>
+  <script src="/static/js/components/nav.js"></script>
+  <script src="/static/js/components/toast.js"></script>
+  <script src="/static/js/components/modal.js"></script>
+  <script src="/static/js/components/loading.js"></script>
+  <script src="/static/js/components/pagination.js"></script>
+  <script src="/static/js/pages/learning.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
