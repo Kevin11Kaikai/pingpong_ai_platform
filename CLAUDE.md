@@ -97,3 +97,123 @@ Phase 1: 基础架构 → Phase 2: LLM/RAG → Phase 3: Ball Tracking (BlurBall+
 - HTTPS 配置（Let's Encrypt / self-signed）
 - 数据 seeding 脚本（补全 social-media 和 learning 初始数据）
 - 云服务器部署（如果有远程 Linux 机器）
+
+---
+
+## 2026-02-26 Ball Tracking 前端专项修复
+
+### 背景
+视频分析页面（http://localhost/video）上传视频后：轨迹叠加 canvas 无渲染、速度标签布局异常、数据库写入失败。
+
+---
+
+### 后端修复
+
+#### `app/ball_tracking/api/videos.py`
+1. **numpy JSON 序列化错误**（`TypeError: Object of type float32 is not JSON serializable`）
+   - 根因：BlurBall pipeline 输出 `np.float32`/`np.float64` 标量，SQLAlchemy JSON 列用原生 `json.dumps` 无法序列化
+   - 修复：新增 `_to_py(obj)` 递归转换器，在写入 `points_json` 和 `analysis_json` 前调用
+   - 覆盖类型：`np.integer→int`、`np.floating→float`、`np.ndarray→list`、`np.bool_→bool`
+
+2. **新增 `GET /jobs/{job_id}/video/original` 端点**
+   - 根因：前端 `video.src = getVideoUrl(jobId, 'original')` 调用的路径不存在，视频播放器永远空白
+   - 修复：新增 `FileResponse` 端点，支持 `.mp4/.avi/.mov/.mkv/.webm` 五种格式
+
+3. **前后端字段名不一致修复**（上一 session 遗留，已确认）
+   - `process_video_task` except 块缺少 `await db.rollback()` 导致 job 卡在 `processing` 状态
+   - 修复：rollback 后重新查询 job 对象再写入 `status=failed`
+
+#### `app/ball_tracking/api/visualization.py`
+- 同上，`generate_visualization_task` except 块补充 `await db.rollback()` + 重新查询
+
+#### `requirements.txt`
+- 新增 BlurBall 运行时依赖：`pandas>=2.0.0`、`scikit-learn>=1.4.0`、`torchmetrics>=1.4.0`
+- 根因：`external/blurball/src/runners/inference.py` 等文件通过 `sys.path.insert` 在运行时加载，包含 `import pandas`
+
+#### `docker/Dockerfile.prod`
+- 新增两个 COPY 层：
+  ```dockerfile
+  COPY --chown=pingpong:pingpong scripts/ ./scripts/
+  COPY --chown=pingpong:pingpong data/test/ ./test_data/
+  ```
+- 原因：`/app/data/` 是 Docker volume 挂载点，image 内的文件会被覆盖；测试数据改放 `/app/test_data/`
+
+---
+
+### 前端修复
+
+#### `frontend/js/api/ball-tracking.js`
+- `getJobs` 参数名 `skip` → `offset`（后端 `list_jobs` 用 `offset` 查询参数）
+
+#### `frontend/js/utils/format.js`
+- `Format.status` defaultMap 补充 `queued: { label: '队列中', color: 'warning' }`
+
+#### `frontend/pages/video.html`
+- 所有 `<script>` 标签加 `?v=3` 后缀，强制浏览器绕过 ETag 缓存，加载最新 JS
+
+#### `frontend/js/pages/video.js`
+关键修复：
+1. **`showHistory()` 响应结构错误**：`getJobs` 返回 `{ items:[], total, ... }`，原代码当数组用 → 改为 `response.items`
+2. **`downloadVisualization()` 立即下载 404**：可视化文件异步生成，原代码拿到 202 立即下载 → 改为循环 HEAD 轮询，最多等 60s
+3. **`play` 事件不检查 `showTrajectory` 状态** → 加守卫 `if (this.showTrajectory)`
+4. **`setAnalysis` 防御性调用**：改为 `this.canvasController?.setAnalysis?.(result.analysis)` 兼容缓存场景
+5. **分析完成后立即绘制一帧**：`this.canvasController.startAnimation()` 在 `onAnalysisComplete` 末尾调用，暂停状态也能看到轨迹
+6. **`loadResults` 注入真实 FPS 和分析数据**：
+   ```javascript
+   this.canvasController.setTracks(this.tracks, fps);          // 真实帧率
+   this.canvasController.setAnalysis(result.analysis);         // 速度数据
+   ```
+
+#### `frontend/js/utils/canvas.js`
+四类 bug 全部修复：
+
+**1. 数据结构不匹配（CRITICAL）**
+- 根因：后端返回 `Track2DResponse[]`（嵌套 `points[]`），旧代码把它当扁平点数组 → `t.frame` 永远 `undefined`，过滤器始终返回空数组
+- 修复：`setTracks` 展开嵌套结构，转换为 `{frame, x, y}` 扁平数组并按帧排序；同时构建 `segments[]` 存储每段元数据
+
+**2. 坐标系映射错误（CRITICAL）**
+- 根因：后端返回原始像素坐标（如 `x=423`），旧代码做 `point.x * canvas.width` = 542,080，远超画布范围
+- 修复：`canvas.width = video.videoWidth`（原生分辨率），直接使用 `point.x/y`，CSS 负责缩放
+
+**3. Canvas 初始尺寸为 0**
+- 根因：`resize()` 仅绑定 `loadedmetadata` 事件，历史任务回放时 canvas 保持 0×0
+- 修复：`initOverlay` 调用时立即执行一次 `resize()`
+
+**4. `ctx` 状态污染（黄色大矩形 bug）**
+- 根因：`drawSpeedLabel` 的 `isFastest` 分支调用了第二次 `fillRoundRect`，但此时 `ctx.fillStyle` 已被改为橙色文字色 `'#fa8c16'`，导致整个标签被橙色覆盖；且无 `save/restore` 导致 `lineWidth=1.5` 泄露到后续绘制
+- 修复：删除重复的 `fillRoundRect` 调用（只 stroke 不 fill），整个 `drawSpeedLabel` 包裹 `ctx.save()` / `ctx.restore()`
+
+**新增功能：速度标签 + 悬停详情**
+- `setAnalysis(analysisData)`：按 `track_id` 匹配分析结果，回填 `maxSpeedKmh/avgSpeedKmh`，标记最高速段 `isFastest=true`
+- `drawSpeedLabel(seg)`：在活跃段起点绘制 `"#N xx.x km/h"` 标签，最高速用橙色边框
+- `drawHoverTooltip(seg)`：在 `canvas.parentElement` 监听 `mousemove`，悬停轨迹时显示详情框
+- 速度标签过滤条件（最终）：`seg.startFrame <= currentFrame && currentFrame <= seg.endFrame`（只显示当前帧所属轨迹段）
+
+---
+
+### 待验证（下次 session 继续）
+
+| 项目 | 预期效果 | 验证方法 |
+|------|----------|----------|
+| 速度标签一一对应 | 播放视频时只有当前帧所属轨迹段显示速度标签 | 播放并观察标签是否随帧切换 |
+| 黄色矩形消失 | 标签为小型半透明暗色背景，不出现橙色大块 | 上传 test3.mp4，观察 canvas |
+| 最高速橙色高亮 | 最快段标签有橙色边框 | 检查 `#2 27.1 km/h` 是否有边框 |
+| 悬停详情框 | 鼠标移到轨迹线上出现详情 | 鼠标悬停轨迹区域 |
+| 视频播放器加载 | `<video>` 元素能正常播放上传的视频 | 检查 Network 标签 `/video/original` 200 |
+
+### 验证前快速检查步骤
+```
+# 确认容器 healthy
+docker ps --format "table {{.Names}}\t{{.Status}}"
+
+# 上传视频后检查 job 状态（应为 completed）
+curl http://localhost/api/ball-tracking/jobs/{job_id}/status
+
+# 检查轨迹数据格式（应包含 points[] 数组）
+curl http://localhost/api/ball-tracking/jobs/{job_id}/tracks | python -m json.tool | head -30
+
+# 浏览器 Console 验证
+VideoPage.tracks                        # 应为 Track2DResponse[]
+VideoPage.canvasController.setAnalysis  # 应为 function（非 undefined）
+document.getElementById('overlayCanvas').width  # 应为视频原生宽度
+```
