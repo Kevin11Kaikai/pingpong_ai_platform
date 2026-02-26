@@ -78,11 +78,12 @@ async def generate_visualization_task(
 
         except Exception:
             logger.exception(f"生成可视化失败: {viz_id}")
-            # 删除失败的记录
-            result = await db.execute(
+            await db.rollback()
+            # rollback 后需重新查询，再删除失败记录
+            failed_result = await db.execute(
                 select(VisualizationOutput).where(VisualizationOutput.id == viz_id)
             )
-            viz = result.scalar_one_or_none()
+            viz = failed_result.scalar_one_or_none()
             if viz:
                 await db.delete(viz)
                 await db.commit()

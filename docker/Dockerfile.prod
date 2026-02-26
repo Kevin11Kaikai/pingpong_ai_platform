@@ -72,6 +72,9 @@ RUN mkdir -p /app/data /app/logs /app/app/vectorstore && \
 COPY --chown=pingpong:pingpong app/ ./app/
 COPY --chown=pingpong:pingpong config/ ./config/
 COPY --chown=pingpong:pingpong frontend/ ./frontend/
+# 脚本和测试数据（test_data/ 不在 volume 挂载点 /app/data/ 下，避免被 volume 覆盖）
+COPY --chown=pingpong:pingpong scripts/ ./scripts/
+COPY --chown=pingpong:pingpong data/test/ ./test_data/
 
 # 切换到非 root 用户
 USER pingpong

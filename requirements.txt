@@ -39,3 +39,8 @@ tenacity>=8.2.0
 
 # Monitoring (Phase 10)
 prometheus-client>=0.19.0
+
+# BlurBall runtime deps (inference path requires these)
+pandas>=2.0.0
+scikit-learn>=1.4.0
+torchmetrics>=1.4.0

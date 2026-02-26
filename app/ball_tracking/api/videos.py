@@ -10,9 +10,12 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks, Depends, Query
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from loguru import logger
+
+import numpy as np
 
 from app.shared.database import get_db_session
 from app.ball_tracking.models import ProcessingJob, BallTrack2D
@@ -39,13 +42,30 @@ router = APIRouter()
 ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
 
 
+def _to_py(obj):
+    """递归将 numpy 标量/数组转换为 Python 原生类型，防止 JSON 序列化失败"""
+    if isinstance(obj, dict):
+        return {k: _to_py(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_to_py(v) for v in obj]
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    return obj
+
+
 async def process_video_task(job_id: str, video_path: str):
     """
     后台处理视频任务
     """
     from app.shared.database import async_session_factory
 
-    async with async_session_factory() as db:
+    async with async_session_factory()() as db:
         try:
             # 更新状态为处理中
             result = await db.execute(
@@ -142,8 +162,8 @@ async def process_video_task(job_id: str, video_path: str):
                     end_frame=track.end_frame,
                     point_count=track.point_count,
                     duration_ms=track.duration_ms,
-                    points_json=points_json,
-                    analysis_json=analysis_json,
+                    points_json=_to_py(points_json),
+                    analysis_json=_to_py(analysis_json),
                 )
                 db.add(track_record)
 
@@ -158,10 +178,18 @@ async def process_video_task(job_id: str, video_path: str):
 
         except Exception as e:
             logger.exception(f"处理任务失败: {job_id}")
-            job.status = "failed"
-            job.error_message = str(e)
-            job.current_stage = "error"
-            await db.commit()
+            # 必须先 rollback，否则 session 处于无效事务状态，后续 commit 会静默失败
+            await db.rollback()
+            # rollback 后 job 对象已 expired/detached，需重新查询再写入
+            failed_result = await db.execute(
+                select(ProcessingJob).where(ProcessingJob.id == job_id)
+            )
+            job = failed_result.scalar_one_or_none()
+            if job:
+                job.status = "failed"
+                job.error_message = str(e)
+                job.current_stage = "error"
+                await db.commit()
 
 
 @router.post("/upload", response_model=VideoUploadResponse, status_code=202)
@@ -464,3 +492,37 @@ async def list_jobs(
         limit=limit,
         offset=offset,
     )
+
+
+@router.get("/jobs/{job_id}/video/original")
+async def get_original_video(
+    job_id: str,
+    db: AsyncSession = Depends(get_db_session),
+):
+    """
+    获取原始上传视频文件
+
+    - 供前端 <video> 播放器直接加载
+    - 支持 mp4 / avi / mov / mkv / webm
+    """
+    result = await db.execute(
+        select(ProcessingJob).where(ProcessingJob.id == job_id)
+    )
+    job = result.scalar_one_or_none()
+
+    if not job:
+        raise HTTPException(status_code=404, detail="任务不存在")
+
+    if not os.path.exists(job.file_path):
+        raise HTTPException(status_code=404, detail="视频文件不存在或已被删除")
+
+    ext = Path(job.file_path).suffix.lower()
+    media_types = {
+        ".mp4": "video/mp4",
+        ".avi": "video/x-msvideo",
+        ".mov": "video/quicktime",
+        ".mkv": "video/x-matroska",
+        ".webm": "video/webm",
+    }
+    media_type = media_types.get(ext, "video/mp4")
+    return FileResponse(job.file_path, media_type=media_type)
