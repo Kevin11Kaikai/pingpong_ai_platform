@@ -32,13 +32,7 @@ const VideoPage = {
    * 初始化
    */
   init() {
-    // 检查是否有正在进行的任务
-    const pendingJob = Storage.get('pending_video_job');
-    if (pendingJob) {
-      this.currentJobId = pendingJob;
-      this.showAnalysisSection();
-      this.pollJobStatus();
-    }
+    Storage.remove('pending_video_job');
   },
 
   /**
@@ -110,7 +104,6 @@ const VideoPage = {
       });
 
       this.currentJobId = result.job_id;
-      Storage.set('pending_video_job', this.currentJobId);
 
       // 显示分析区域
       this.showAnalysisSection();
@@ -150,7 +143,7 @@ const VideoPage = {
       if (status.status === 'completed') {
         this.onAnalysisComplete();
       } else if (status.status === 'failed') {
-        this.onAnalysisFailed(status.error);
+        this.onAnalysisFailed(status.error_message);
       } else {
         // 继续轮询
         this.pollTimer = setTimeout(() => this.pollJobStatus(), 2000);
@@ -172,30 +165,28 @@ const VideoPage = {
     const message = document.getElementById('taskMessage');
 
     const statusMap = {
-      pending: { text: '等待中', color: 'warning' },
+      queued: { text: '队列中', color: 'warning' },
       processing: { text: '处理中', color: 'primary' },
       completed: { text: '已完成', color: 'success' },
       failed: { text: '失败', color: 'error' },
     };
 
-    const statusInfo = statusMap[status.status] || statusMap.pending;
+    const statusInfo = statusMap[status.status] || statusMap.queued;
 
     badge.textContent = statusInfo.text;
     badge.className = `badge badge-${statusInfo.color}`;
 
-    const percent = status.progress || 0;
+    const percent = status.progress_percent || 0;
     progress.style.width = `${percent}%`;
     progressText.textContent = `${percent}%`;
 
-    message.textContent = status.message || '正在分析视频...';
+    message.textContent = status.current_stage || '正在分析视频...';
   },
 
   /**
    * 分析完成
    */
   async onAnalysisComplete() {
-    Storage.remove('pending_video_job');
-
     // 加载视频和结果
     const video = document.getElementById('videoPlayer');
     video.src = ballTrackingApi.getVideoUrl(this.currentJobId, 'original');
@@ -209,12 +200,15 @@ const VideoPage = {
     this.canvasController.setTracks(this.tracks);
 
     video.addEventListener('play', () => {
-      this.canvasController.startAnimation();
+      if (this.showTrajectory) this.canvasController.startAnimation();
     });
 
     video.addEventListener('pause', () => {
       this.canvasController.stopAnimation();
     });
+
+    // 分析完成后立即绘制第一帧（视频暂停时也能看到轨迹）
+    this.canvasController.startAnimation();
 
     // 加载分析结果
     await this.loadResults();
@@ -231,7 +225,6 @@ const VideoPage = {
    * @param {string} error - 错误信息
    */
   onAnalysisFailed(error) {
-    Storage.remove('pending_video_job');
     Toast.error('分析失败: ' + (error || '未知错误'));
 
     // 允许重新上传
@@ -257,6 +250,18 @@ const VideoPage = {
   async loadResults() {
     try {
       const result = await ballTrackingApi.getJobResult(this.currentJobId);
+
+      // 用真实帧率更新 canvas 控制器的 fps（默认 30）
+      const fps = result.video_metadata && result.video_metadata.fps;
+      if (fps && this.canvasController) {
+        this.canvasController.setTracks(this.tracks, fps);
+      }
+
+      // 注入速度分析数据，触发速度标签和最高速高亮
+      if (this.canvasController?.setAnalysis && result.analysis) {
+        this.canvasController.setAnalysis(result.analysis);
+      }
+
       this.renderStats(result);
       this.renderSpeedData(result);
       this.renderLandingData(result);
@@ -274,32 +279,46 @@ const VideoPage = {
     const container = document.getElementById('analysisStats');
     if (!container) return;
 
-    const stats = result.statistics || {};
+    // 从 analysis[].speed_stats 聚合速度数据
+    const analysis = result.analysis || [];
+    let avgSpeed = 0;
+    let maxSpeed = 0;
+    let speedCount = 0;
+    let totalBounces = 0;
+    for (const a of analysis) {
+      if (a.speed_stats) {
+        avgSpeed += a.speed_stats.avg_speed_kmh || 0;
+        maxSpeed = Math.max(maxSpeed, a.speed_stats.max_speed_kmh || 0);
+        speedCount++;
+      }
+      totalBounces += (a.bounce_points || []).length;
+    }
+    if (speedCount > 0) avgSpeed /= speedCount;
 
     container.innerHTML = `
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${stats.total_frames || 0}</div>
+        <div class="analysis-stat-value">${result.frame_count || 0}</div>
         <div class="analysis-stat-label">总帧数</div>
       </div>
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${stats.ball_detected_frames || 0}</div>
+        <div class="analysis-stat-value">${result.detection_count || 0}</div>
         <div class="analysis-stat-label">检测到球</div>
       </div>
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${(stats.avg_speed || 0).toFixed(1)}</div>
+        <div class="analysis-stat-value">${avgSpeed.toFixed(1)}</div>
         <div class="analysis-stat-label">平均球速 (km/h)</div>
       </div>
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${(stats.max_speed || 0).toFixed(1)}</div>
+        <div class="analysis-stat-value">${maxSpeed.toFixed(1)}</div>
         <div class="analysis-stat-label">最高球速 (km/h)</div>
       </div>
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${stats.total_hits || 0}</div>
-        <div class="analysis-stat-label">击球次数</div>
+        <div class="analysis-stat-value">${totalBounces}</div>
+        <div class="analysis-stat-label">落点次数</div>
       </div>
       <div class="analysis-stat-item">
-        <div class="analysis-stat-value">${stats.rally_count || 0}</div>
-        <div class="analysis-stat-label">回合数</div>
+        <div class="analysis-stat-value">${(result.tracks || []).length}</div>
+        <div class="analysis-stat-label">轨迹段数</div>
       </div>
     `;
   },
@@ -312,24 +331,27 @@ const VideoPage = {
     const container = document.getElementById('speedData');
     if (!container) return;
 
-    const speeds = result.speed_analysis || [];
+    // 从 analysis[].speed_stats 提取各轨迹最高球速
+    const speedItems = (result.analysis || [])
+      .filter(a => a.speed_stats)
+      .map(a => a.speed_stats);
 
-    if (speeds.length === 0) {
+    if (speedItems.length === 0) {
       container.innerHTML = '<div class="text-secondary text-sm">暂无球速数据</div>';
       return;
     }
 
     container.innerHTML = `
       <div class="list" style="max-height: 200px; overflow-y: auto;">
-        ${speeds.slice(0, 20).map((item, index) => `
+        ${speedItems.slice(0, 20).map((item, index) => `
           <div class="list-item" style="padding: 8px 0;">
             <span class="text-sm">#${index + 1}</span>
             <div class="flex-1 px-md">
               <div class="progress" style="height: 6px;">
-                <div class="progress-bar" style="width: ${Math.min(item.speed / 150 * 100, 100)}%;"></div>
+                <div class="progress-bar" style="width: ${Math.min(item.max_speed_kmh / 150 * 100, 100)}%;"></div>
               </div>
             </div>
-            <span class="text-sm font-medium">${item.speed.toFixed(1)} km/h</span>
+            <span class="text-sm font-medium">${item.max_speed_kmh.toFixed(1)} km/h</span>
           </div>
         `).join('')}
       </div>
@@ -344,21 +366,36 @@ const VideoPage = {
     const container = document.getElementById('landingData');
     if (!container) return;
 
-    const landings = result.landing_points || {};
+    // 从 analysis[].bounce_points 聚合落点，以视频宽度中线区分左右
+    const videoWidth = result.video_metadata ? result.video_metadata.width : 0;
+    let leftCount = 0;
+    let rightCount = 0;
+    for (const a of (result.analysis || [])) {
+      for (const bp of (a.bounce_points || [])) {
+        if (videoWidth > 0 && bp.x < videoWidth / 2) {
+          leftCount++;
+        } else {
+          rightCount++;
+        }
+      }
+    }
+    const total = leftCount + rightCount;
+    const leftPercent = total > 0 ? Math.round(leftCount / total * 100) : 0;
+    const rightPercent = total > 0 ? Math.round(rightCount / total * 100) : 0;
 
     container.innerHTML = `
       <div class="grid grid-cols-2 gap-md">
         <div class="p-md" style="background: var(--success-bg); border-radius: var(--radius);">
-          <div class="text-2xl font-bold text-success">${landings.left || 0}</div>
+          <div class="text-2xl font-bold text-success">${leftCount}</div>
           <div class="text-sm text-secondary">左侧落点</div>
         </div>
         <div class="p-md" style="background: var(--warning-bg); border-radius: var(--radius);">
-          <div class="text-2xl font-bold text-warning">${landings.right || 0}</div>
+          <div class="text-2xl font-bold text-warning">${rightCount}</div>
           <div class="text-sm text-secondary">右侧落点</div>
         </div>
       </div>
       <div class="mt-md text-sm text-secondary">
-        落点分布比例：左 ${landings.left_percent || 0}% / 右 ${landings.right_percent || 0}%
+        落点分布比例：左 ${leftPercent}% / 右 ${rightPercent}%
       </div>
     `;
   },
@@ -371,22 +408,23 @@ const VideoPage = {
     const container = document.getElementById('rallyData');
     if (!container) return;
 
-    const rallies = result.rallies || [];
+    // 后端无独立 rallies 字段，以 tracks[] 每段轨迹代表一个回合
+    const tracks = result.tracks || [];
 
-    if (rallies.length === 0) {
+    if (tracks.length === 0) {
       container.innerHTML = '<div class="text-secondary text-sm">暂无回合数据</div>';
       return;
     }
 
     container.innerHTML = `
       <div class="list" style="max-height: 200px; overflow-y: auto;">
-        ${rallies.map((rally, index) => `
+        ${tracks.map((track, index) => `
           <div class="list-item" style="padding: 8px 0;">
-            <span class="badge badge-primary">回合 ${index + 1}</span>
+            <span class="badge badge-primary">轨迹 ${index + 1}</span>
             <div class="flex-1 px-md">
-              <span class="text-sm">${rally.hits} 次击球</span>
+              <span class="text-sm">${track.point_count} 个检测点</span>
             </div>
-            <span class="text-sm text-secondary">${Format.duration(rally.duration)}</span>
+            <span class="text-sm text-secondary">${Format.duration(track.duration_ms / 1000)}</span>
           </div>
         `).join('')}
       </div>
@@ -433,19 +471,36 @@ const VideoPage = {
   async downloadVisualization() {
     if (!this.currentJobId) return;
 
-    Toast.info('正在生成可视化视频...');
+    Toast.info('正在生成可视化视频，请稍候...');
 
     try {
       const result = await ballTrackingApi.generateVisualization(this.currentJobId);
+      const downloadUrl = result.output_url;
 
-      // 打开下载链接
-      const url = ballTrackingApi.getVideoUrl(this.currentJobId, 'visualized');
+      // 后台任务异步生成，轮询等待文件就绪（最多 60 秒，每 2 秒检查一次）
+      let ready = false;
+      for (let i = 0; i < 30; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        const check = await fetch(downloadUrl, { method: 'HEAD' });
+        if (check.ok) {
+          ready = true;
+          break;
+        }
+      }
+
+      if (!ready) {
+        Toast.error('可视化视频生成超时，请稍后重试');
+        return;
+      }
+
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = 'visualization.mp4';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
-      Toast.success('可视化视频已生成');
+      Toast.success('可视化视频已生成，开始下载');
     } catch (e) {
       Toast.error('生成失败: ' + e.message);
     }
@@ -456,9 +511,10 @@ const VideoPage = {
    */
   async showHistory() {
     try {
-      const jobs = await ballTrackingApi.getJobs(0, 20);
+      const response = await ballTrackingApi.getJobs(0, 20);
+      const jobs = (response && response.items) || [];
 
-      if (!jobs || jobs.length === 0) {
+      if (jobs.length === 0) {
         Modal.alert('暂无分析历史记录');
         return;
       }
@@ -466,7 +522,7 @@ const VideoPage = {
       const content = `
         <div class="list" style="max-height: 400px; overflow-y: auto;">
           ${jobs.map(job => `
-            <div class="list-item" style="cursor: pointer;" onclick="VideoPage.loadJob('${job.id}')">
+            <div class="list-item" style="cursor: pointer;" onclick="VideoPage.loadJob('${job.job_id}')">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
                 <polygon points="23 7 16 12 23 17 23 7"/>
                 <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
@@ -477,7 +533,7 @@ const VideoPage = {
                   ${Format.status(job.status).label} · ${Format.relativeTime(job.created_at)}
                 </div>
               </div>
-              <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); VideoPage.deleteJob('${job.id}')">
+              <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); VideoPage.deleteJob('${job.job_id}')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>

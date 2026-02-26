@@ -54,12 +54,12 @@ const ballTrackingApi = {
 
   /**
    * 获取任务列表
-   * @param {number} skip - 跳过数量
+   * @param {number} offset - 偏移量
    * @param {number} limit - 限制数量
-   * @returns {Promise<Array>} 任务列表
+   * @returns {Promise<Object>} 任务列表（含 items / total / limit / offset）
    */
-  async getJobs(skip = 0, limit = 20) {
-    return apiClient.get('/ball-tracking/jobs', { skip, limit });
+  async getJobs(offset = 0, limit = 20) {
+    return apiClient.get('/ball-tracking/jobs', { offset, limit });
   },
 
   /**
