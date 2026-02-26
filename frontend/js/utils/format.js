@@ -226,6 +226,7 @@ const Format = {
    */
   status(status, statusMap = {}) {
     const defaultMap = {
+      queued: { label: '队列中', color: 'warning' },
       pending: { label: '待处理', color: 'warning' },
       processing: { label: '处理中', color: 'primary' },
       completed: { label: '已完成', color: 'success' },
